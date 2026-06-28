@@ -1,0 +1,314 @@
+/* ── Google Font Import (must precede @tailwind directives) ─────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS Custom Properties ──────────────────────────────────────── */
+:root {
+  /* Public portal */
+  --navy:        #08162d;
+  --navy-card:   #0f2343;
+  --amber:       #e28a00;
+  --amber-hover: #c67900;
+  /* Admin */
+  --admin:       #bc8041;
+  --admin-hover: #a56f34;
+  /* Helpers */
+  --accent-blue: #1d4ed8;
+  --border-soft: #f1f5f9;
+  --border-mid:  #e2e8f0;
+  --page-bg:     #f8fafc;
+  --white:       #ffffff;
+  --ink:         #0f172a;
+}
+
+/* ── Base Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  background-color: var(--page-bg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+img { display: block; max-width: 100%; }
+
+/* ── Scrollbar Hiding ───────────────────────────────────────────── */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Card Component ─────────────────────────────────────────────── */
+.card {
+  @apply rounded-2xl bg-white shadow-card;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   BRAND COLOR OVERRIDES
+   These ensure the exact hex values are always applied, bypassing
+   any Tailwind JIT purge issues during development.
+───────────────────────────────────────────────────────────────── */
+
+/* Navy fills */
+.bg-navy        { background-color: #08162d !important; }
+.bg-navy-card   { background-color: #0f2343 !important; }
+.text-navy      { color: #08162d !important; }
+.border-navy    { border-color: #08162d !important; }
+
+/* Amber fills */
+.bg-amber       { background-color: #e28a00 !important; }
+.text-amber     { color: #e28a00 !important; }
+.border-amber   { border-color: #e28a00 !important; }
+
+/* Hover states */
+.hover\:bg-amber-hover:hover { background-color: #c67900 !important; }
+.hover\:text-amber:hover     { color: #e28a00 !important; }
+
+/* Admin fills */
+.bg-admin       { background-color: #bc8041 !important; }
+.text-admin     { color: #bc8041 !important; }
+.hover\:bg-admin-hover:hover { background-color: #a56f34 !important; }
+
+/* Accent Blue */
+.bg-accent-blue { background-color: #1d4ed8 !important; }
+.text-accent-blue { color: #1d4ed8 !important; }
+
+/* Translucent Navy utilities */
+.bg-navy\/5   { background-color: rgba(8,22,45,0.05)  !important; }
+.bg-navy\/10  { background-color: rgba(8,22,45,0.10)  !important; }
+.bg-navy\/20  { background-color: rgba(8,22,45,0.20)  !important; }
+.bg-navy\/80  { background-color: rgba(8,22,45,0.80)  !important; }
+.bg-navy\/90  { background-color: rgba(8,22,45,0.90)  !important; }
+.border-navy\/20 { border-color: rgba(8,22,45,0.20)   !important; }
+.border-navy\/30 { border-color: rgba(8,22,45,0.30)   !important; }
+
+/* Translucent Amber utilities */
+.bg-amber\/5  { background-color: rgba(226,138,0,0.05) !important; }
+.bg-amber\/10 { background-color: rgba(226,138,0,0.10) !important; }
+.bg-amber\/15 { background-color: rgba(226,138,0,0.15) !important; }
+.bg-amber\/20 { background-color: rgba(226,138,0,0.20) !important; }
+.border-amber\/20 { border-color: rgba(226,138,0,0.20) !important; }
+.border-amber\/30 { border-color: rgba(226,138,0,0.30) !important; }
+.border-amber\/40 { border-color: rgba(226,138,0,0.40) !important; }
+.hover\:bg-amber\/10:hover { background-color: rgba(226,138,0,0.10) !important; }
+.hover\:border-amber:hover { border-color: #e28a00 !important; }
+
+/* White translucent utilities (for dark backgrounds) */
+.bg-white\/5  { background-color: rgba(255,255,255,0.05)  !important; }
+.bg-white\/10 { background-color: rgba(255,255,255,0.10)  !important; }
+.bg-white\/15 { background-color: rgba(255,255,255,0.15)  !important; }
+.bg-white\/20 { background-color: rgba(255,255,255,0.20)  !important; }
+.bg-white\/25 { background-color: rgba(255,255,255,0.25)  !important; }
+.bg-white\/30 { background-color: rgba(255,255,255,0.30)  !important; }
+.border-white\/10 { border-color: rgba(255,255,255,0.10)  !important; }
+.border-white\/20 { border-color: rgba(255,255,255,0.20)  !important; }
+.border-white\/30 { border-color: rgba(255,255,255,0.30)  !important; }
+.border-white\/40 { border-color: rgba(255,255,255,0.40)  !important; }
+.text-white\/60  { color: rgba(255,255,255,0.60)  !important; }
+.text-white\/70  { color: rgba(255,255,255,0.70)  !important; }
+.text-white\/80  { color: rgba(255,255,255,0.80)  !important; }
+.text-white\/90  { color: rgba(255,255,255,0.90)  !important; }
+.hover\:bg-white\/10:hover { background-color: rgba(255,255,255,0.10) !important; }
+.hover\:bg-white\/20:hover { background-color: rgba(255,255,255,0.20) !important; }
+.hover\:border-white\/50:hover { border-color: rgba(255,255,255,0.50) !important; }
+
+/* ── Soft page background ───────────────────────────────────────── */
+.bg-mist  { background-color: #f8fafc !important; }
+
+/* ── Login Card Animation ───────────────────────────────────────── */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+/* ── Focus ring ─────────────────────────────────────────────────── */
+.focus\:border-amber:focus { border-color: #e28a00 !important; }
+
+/* ── Gradient hero backdrop ─────────────────────────────────────── */
+.hero-bg {
+  background: linear-gradient(135deg, #08162d 0%, #0f2343 100%);
+}
+.footer-bg {
+  background: linear-gradient(160deg, #08162d 0%, #0f2343 100%);
+}
+
+/* ── Shadow utility aliases ─────────────────────────────────────── */
+.shadow-amber { box-shadow: 0 6px 20px rgba(226,138,0,0.30) !important; }
+.shadow-card  { box-shadow: 0 4px 16px rgba(8,22,45,0.08) !important; }
+.shadow-glow  { box-shadow: 0 12px 28px rgba(8,22,45,0.12) !important; }
+
+/* ── ReactQuill Rich Text Editor Styles ─────────────────────────── */
+.rich-editor .ql-container {
+  min-height: 160px;
+  font-size: 13px;
+  font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.rich-editor .ql-editor {
+  min-height: 160px;
+  line-height: 1.7;
+}
+
+.rich-editor .ql-toolbar {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.rich-editor .ql-container {
+  border-color: #e2e8f0;
+}
+
+.rich-editor .ql-editor.ql-blank::before {
+  font-size: 13px;
+  color: #94a3b8;
+  font-style: normal;
+}
+
+.rich-editor .ql-toolbar button:hover .ql-stroke,
+.rich-editor .ql-toolbar .ql-active .ql-stroke {
+  stroke: #c58237;
+}
+
+.rich-editor .ql-toolbar button:hover .ql-fill,
+.rich-editor .ql-toolbar .ql-active .ql-fill {
+  fill: #c58237;
+}
+
+.rich-editor .ql-toolbar button:hover,
+.rich-editor .ql-toolbar .ql-active {
+  color: #c58237;
+}
+
+.rich-editor .ql-editor img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+/* ── Table Styles for ReactQuill Editor ────────────────────────── */
+.rich-editor .ql-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.rich-editor .ql-editor table th,
+.rich-editor .ql-editor table td {
+  border: 1px solid #cbd5e1;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  min-width: 80px;
+}
+
+.rich-editor .ql-editor table th {
+  background-color: #f1f5f9;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rich-editor .ql-editor table td {
+  background-color: #ffffff;
+  color: #334155;
+}
+
+.rich-editor .ql-editor table tr:nth-child(even) td {
+  background-color: #f8fafc;
+}
+
+/* ── Custom table icon in the Quill toolbar ───────────────────── */
+.ql-toolbar button.ql-table-embed::after {
+  content: "⊞";
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ql-toolbar button.ql-table-embed svg {
+  display: none;
+}
+
+/* ── Table embed wrapper (atomic table insertion) ──────────────── */
+.rich-editor .ql-table-embed {
+  display: inline-block;
+  width: 100%;
+}
+
+.rich-editor .ql-table-embed table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0;
+}
+
+.rich-editor .ql-table-embed table th,
+.rich-editor .ql-table-embed table td {
+  border: 1px solid #cbd5e1;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.rich-editor .ql-table-embed table th {
+  background-color: #f1f5f9;
+  font-weight: 700;
+}
+
+/* ── Frontend / Public-facing table styles (CollegeDetail, etc.) ─ */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+  overflow-x: auto;
+  display: block;
+}
+
+.prose table th,
+.prose table td {
+  border: 1px solid #e2e8f0;
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose table th {
+  background-color: #f8fafc;
+  font-weight: 700;
+  color: #0f172a;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.prose table td {
+  color: #334155;
+}
+
+.prose table tr:nth-child(even) td {
+  background-color: #f8fafc;
+}
+
+.prose table tr:hover td {
+  background-color: #f1f5f9;
+}

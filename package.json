@@ -1,0 +1,15 @@
+{
+  "name": "college-dakhla-clone",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @college/api\" \"npm run dev -w @college/web\"",
+    "dev:api": "npm run dev -w @college/api",
+    "dev:web": "npm run dev -w @college/web",
+    "build": "npm run build -w @college/web",
+    "start": "npm run start -w @college/api"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
