@@ -5,11 +5,20 @@ const listBlogs = async (req, res, next) => {
   try {
     const { page, limit, skip } = parsePagination(req.query);
     const filter = { isDeleted: false };
-    if (!req.user) filter.status = "Published";
-    if (req.query.category) filter.category = req.query.category;
+    if (!req.user) {
+      filter.status = { $in: ["Published", "Active"] };
+    } else if (req.query.status) {
+      filter.status = req.query.status;
+    }
+    if (req.query.category && req.query.category !== "All") {
+      filter.$or = [
+        { category: new RegExp(`^${req.query.category}$`, "i") },
+        { blogCategory: new RegExp(`^${req.query.category}$`, "i") }
+      ];
+    }
     if (req.query.search) filter.title = new RegExp(req.query.search, "i");
     const [items, total] = await Promise.all([
-      Blog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).select("-content"),
+      Blog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Blog.countDocuments(filter),
     ]);
     res.json({ items, total, page, pages: Math.ceil(total / limit) });

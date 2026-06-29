@@ -160,6 +160,14 @@ const Sidebar = () => {
             </div>
           </NavLink>
 
+          {/* Q&A Community */}
+          <NavLink to="/admin/questions" className={navItemClass}>
+            <div className="flex items-center gap-3">
+              <span className="text-base">❓</span>
+              <span>Q&amp;A Community</span>
+            </div>
+          </NavLink>
+
           {/* Testimonials */}
           <NavLink to="/admin/testimonials" className={navItemClass}>
             <div className="flex items-center gap-3">

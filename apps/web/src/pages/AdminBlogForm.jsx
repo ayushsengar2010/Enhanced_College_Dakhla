@@ -11,13 +11,14 @@ const AdminBlogForm = ({ mode = "create" }) => {
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
+    category: "Exam Alerts",
     publishDate: "",
     featuredImage: "",
     metaTitle: "",
     authorName: "College Dakhla Team",
     metaDescription: "",
     blogDescription: "",
-    status: "Active",
+    status: "Published",
   });
 
   const [loading, setLoading] = useState(false);
@@ -29,13 +30,14 @@ const AdminBlogForm = ({ mode = "create" }) => {
           setFormData({
             title: data.title || "",
             slug: data.slug || "",
+            category: data.blogCategory || data.category || "Exam Alerts",
             publishDate: data.publishDate ? new Date(data.publishDate).toISOString().split("T")[0] : "",
             featuredImage: data.coverImage || data.featuredImage || "",
             metaTitle: data.metaTitle || "",
             authorName: data.authorName || data.author || "College Dakhla Team",
             metaDescription: data.metaDescription || "",
             blogDescription: data.blogDescription || data.content || "",
-            status: data.status || "Active",
+            status: data.status || "Published",
           });
         })
         .catch((err) => console.error("Error loading blog:", err));
@@ -63,6 +65,9 @@ const AdminBlogForm = ({ mode = "create" }) => {
     try {
       const payload = {
         ...formData,
+        category: formData.category,
+        blogCategory: formData.category,
+        author: formData.authorName,
         publishDate: formData.publishDate || null,
         coverImage: formData.featuredImage || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80",
         content: formData.blogDescription || "Detailed article content...",
@@ -181,6 +186,41 @@ const AdminBlogForm = ({ mode = "create" }) => {
                 onChange={handleChange}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c58237]"
               />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="block text-xs font-black text-slate-800 uppercase mb-1.5">Category</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c58237]"
+              >
+                <option value="Exam Alerts">Exam Alerts</option>
+                <option value="College Alerts">College Alerts</option>
+                <option value="Admission Alerts">Admission Alerts</option>
+                <option value="Design">Design</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Career">Career</option>
+                <option value="Technology">Technology</option>
+              </select>
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="block text-xs font-black text-slate-800 uppercase mb-1.5">Status</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c58237]"
+              >
+                <option value="Published">Published</option>
+                <option value="Active">Active</option>
+                <option value="Draft">Draft</option>
+                <option value="Inactive">Inactive</option>
+              </select>
             </div>
 
             {/* Meta Description */}

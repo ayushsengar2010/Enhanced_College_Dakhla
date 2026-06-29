@@ -4,9 +4,14 @@ const { parsePagination } = require("../utils/pagination");
 const listQuestions = async (req, res, next) => {
   try {
     const { page, limit, skip } = parsePagination(req.query);
-    const filter = { isDeleted: false, status: "Open" };
-    if (req.query.stream) filter.stream = req.query.stream;
-    if (req.query.search) filter.title  = new RegExp(req.query.search, "i");
+    const filter = { isDeleted: false };
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+    if (req.query.stream && req.query.stream !== "All" && req.query.stream !== "All Discussions") {
+      filter.stream = req.query.stream;
+    }
+    if (req.query.search) filter.title = new RegExp(req.query.search, "i");
     const [items, total] = await Promise.all([
       Question.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).select("-answers.authorEmail"),
       Question.countDocuments(filter),

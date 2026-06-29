@@ -191,13 +191,92 @@ async function seedDatabase() {
       { examName: "BITSAT 2026", slug: "bitsat-2026", shortName: "BITSAT", stream: "Engineering", conductingBody: "BITS Pilani", examLevel: "National", examMode: "Online Computer Based", participatingCollegesCount: 4, description: "University level entrance exam for B.E., B.Pharm, and M.Sc programs at BITS campuses.", eligibility: "10+2 PCM with 75% aggregate", syllabus: "Physics, Chemistry, Mathematics, English Proficiency & Logical Reasoning", examPattern: "130 Multiple Choice Questions", applicationStart: new Date("2026-01-15"), applicationEnd: new Date("2026-04-10"), examDate: new Date("2026-05-20"), resultDate: new Date("2026-06-10"), officialWebsite: "https://bitsadmission.com", applicationLink: "https://bitsadmission.com", applicationFee: 3400, status: "Active" }
     ]);
 
-    // 7. Seed Blogs (6 educational articles)
+    // 7. Seed Blogs (News & Educational Articles)
     await Blog.insertMany([
-      { title: "What is a good score in MHT CET 2026?", blogCategory: "Exam Alerts", author: "Dr. K. Sharma", publishDate: new Date("2026-05-21"), blogDescription: "A Score Of 150 Marks Or Above Out Of 200 Is Considered A Good Score In MHT CET 2026 For General Category Candidates.", content: "Detailed breakdown of MHT CET 2026 percentile vs marks calculation and college allotment cutoffs across top Maharashtra engineering institutes.", status: "Active" },
-      { title: "VITEEE 2026 Registration Begins @viteee.vit.ac.in", blogCategory: "Exam Alerts", author: "Admission Cell", publishDate: new Date("2025-10-26"), blogDescription: "The Vellore Institute Of Technology (VIT) Has Officially Released The VITEEE 2026 Application Form online.", content: "Step by step application procedure, slot booking details, exam pattern changes, and fee structure for VIT Vellore, Chennai, AP, and Bhopal campuses.", status: "Active" },
-      { title: "Top 10 Private Engineering Colleges in North India with Highest CTC", blogCategory: "College Comparison", author: "Priya Varma", publishDate: new Date("2026-04-10"), blogDescription: "Complete comparison guide evaluating placements, infrastructure, and fee ROI across North India's private universities.", content: "Comprehensive analysis comparing GLA University Mathura, Shiv Nadar University, Ashoka, and Amity Noida based on real 2025-2026 placement statistics.", status: "Active" },
-      { title: "How to Crack JEE Main 2026 in 90 Days: Preparation Strategy", blogCategory: "Preparation Guide", author: "Prof. R. C. Das", publishDate: new Date("2026-01-15"), blogDescription: "Master high-weightage chapters in Physics, Chemistry, and Math with our proven 90-day revision strategy.", content: "Structured day-by-day revision schedule, formula sheets, mock test strategy, and time management techniques for JEE aspirants.", status: "Active" },
-      { title: "CUET UG 2026 Syllabus and Exam Pattern Breakdown", blogCategory: "Career Guidance", author: "Ankita Roy", publishDate: new Date("2026-03-01"), blogDescription: "Everything you need to know about domain subjects, general test scoring, and normalization procedures.", content: "Detailed guide explaining section-wise subject mapping for Delhi University, BHU, and Central Universities.", status: "Active" }
+      {
+        title: "JEE Main 2026 Phase 2 Counselling & Seat Allotment Guidelines Released",
+        slug: "jee-main-2026-phase-2-counselling-guidelines",
+        category: "Admission Alerts",
+        blogCategory: "Admission Alerts",
+        author: "Dr. Amit Roy",
+        authorName: "Dr. Amit Roy",
+        publishDate: new Date("2026-06-28"),
+        featuredImage: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+        coverImage: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+        blogDescription: "Joint Seat Allocation Authority (JoSAA) has released key dates, document verification steps, and reporting center rules for JEE Main 2026 B.Tech seat allotment across NITs, IIITs, and GFTIs.",
+        content: "<p>The Joint Seat Allocation Authority (JoSAA) has officially announced the detailed schedule and guidelines for JEE Main 2026 Phase 2 Counselling and Seat Allotment. Aspiring engineering candidates across the country can now lock their college and branch choices via the official portal.</p><h4>Key Highlights & Next Steps:</h4><ul><li><strong>Registration & Choice Locking:</strong> Candidates must verify their documents and fill choices prior to the final deadline.</li><li><strong>Seat Acceptance Fee:</strong> Online payment of the seat acceptance fee is required immediately after seat allocation in Round 1.</li><li><strong>Reporting Centers:</strong> Dual reporting is mandated for candidates transitioning between NIT and IIT seats.</li></ul><p>Our expert team at College Dakhla recommends candidates to thoroughly review cutoff trends from previous years before finalizing choice ordering.</p>",
+        status: "Published"
+      },
+      {
+        title: "AI & Machine Learning vs Core CS: Choosing the Right B.Tech Specialization in 2026",
+        slug: "ai-ml-vs-core-cs-btech-specialization-2026",
+        category: "Engineering",
+        blogCategory: "Engineering",
+        author: "Prof. Vikram Malhotra",
+        authorName: "Prof. Vikram Malhotra",
+        publishDate: new Date("2026-06-26"),
+        featuredImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+        coverImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+        blogDescription: "An in-depth comparative analysis evaluating placement records, industry demand, curriculum focus, and career longevity between Computer Science Engineering and AI-ML specialization.",
+        content: "<p>With emerging technology reshaping global industries, engineering aspirants face a critical dilemma: should they choose traditional Core Computer Science & Engineering or opt for specialized branches like Artificial Intelligence & Machine Learning (AI-ML)?</p><h4>Core Computer Science & Engineering</h4><p>Core CSE provides a foundational understanding of algorithms, data structures, computer networks, and operating systems. It offers maximum flexibility for higher studies (M.Tech/MS) and diverse roles ranging from full-stack development to cloud engineering.</p><h4>B.Tech AI & Data Science Specialization</h4><p>Specialized AI-ML programs focus deeply on mathematical modeling, neural networks, deep learning frameworks, and data analytics from year two onwards. Leading tech firms actively recruit AI specialists for roles in autonomous systems, NLP, and predictive analytics.</p><h4>Verdict</h4><p>If you prefer broad software domain mobility, Core CS remains unbeatable. However, for candidates passionate about intelligent automation and data algorithms, AI specialization provides an immediate edge in campus recruitment drives.</p>",
+        status: "Published"
+      },
+      {
+        title: "NEET UG 2026 Answer Key & OMR Sheet Challenge Window Now Open",
+        slug: "neet-ug-2026-answer-key-omr-challenge-window-open",
+        category: "Exam Alerts",
+        blogCategory: "Exam Alerts",
+        author: "Dr. Sunita Sharma",
+        authorName: "Dr. Sunita Sharma",
+        publishDate: new Date("2026-06-25"),
+        featuredImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80",
+        coverImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80",
+        blogDescription: "National Testing Agency (NTA) has uploaded recorded responses and provisional answer keys for NEET UG 2026. Candidates can submit challenges online with supporting proof.",
+        content: "<p>The National Testing Agency (NTA) has officially released the provisional answer keys along with scanned OMR response sheets for NEET UG 2026 medical entrance examination. Medical aspirants across India can now verify their recorded answers on the official NTA portal.</p><h4>How to Challenge Answer Key & Recorded Responses:</h4><ol><li>Visit the official NEET NTA candidate portal and log in with your Application Number and Date of Birth.</li><li>Click on 'Challenge Answer Key' or 'Challenge OMR Sheet'.</li><li>Select the specific question IDs and upload valid textbook references or evidence supporting your claim.</li><li>Pay a non-refundable processing fee of ₹200 per challenged question online.</li></ol><p>Final results and All India Ranks (AIR) will be published following the evaluation of candidate challenges by subject experts.</p>",
+        status: "Published"
+      },
+      {
+        title: "Top High-Paying Career Options After BBA & MBA in 2026: Beyond Finance & HR",
+        slug: "top-high-paying-careers-after-bba-mba-2026",
+        category: "Career",
+        blogCategory: "Career",
+        author: "Rohan Mehta",
+        authorName: "Rohan Mehta",
+        publishDate: new Date("2026-06-24"),
+        featuredImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+        coverImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+        blogDescription: "Discover lucrative modern management careers including Product Management, Growth Marketing, Business Analytics, and Fintech Consulting with CTC packages exceeding ₹20 LPA.",
+        content: "<p>Management education has evolved far beyond traditional banking and general human resources. As corporate landscapes digitize, top B-Schools and corporate recruiters are actively prioritizing dynamic roles that combine business acumen with tech agility.</p><h4>1. Product Management (PM)</h4><p>Product Managers bridge the gap between engineering, design, and business strategy. They oversee product lifecycles and user experience. Average starting CTC for MBA Product Managers ranges between ₹18 LPA to ₹35 LPA in top tech firms.</p><h4>2. Growth Marketing & Performance Analytics</h4><p>Unlike conventional advertising, growth marketers leverage data analytics, SEO automation, and customer acquisition funnels to scale businesses rapidly. Highly sought after by unicorns and startups.</p><h4>3. Business Analytics & Business Intelligence (BI)</h4><p>Businesses rely heavily on data-driven decision making. BI consultants analyze market trends, operational metrics, and financial forecasts to optimize enterprise performance.</p>",
+        status: "Published"
+      },
+      {
+        title: "What is a good score in MHT CET 2026?",
+        slug: "what-is-a-good-score-in-mht-cet-2026",
+        category: "Exam Alerts",
+        blogCategory: "Exam Alerts",
+        author: "Dr. K. Sharma",
+        authorName: "Dr. K. Sharma",
+        publishDate: new Date("2026-05-21"),
+        featuredImage: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80",
+        coverImage: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80",
+        blogDescription: "A Score Of 150 Marks Or Above Out Of 200 Is Considered A Good Score In MHT CET 2026 For General Category Candidates.",
+        content: "Detailed breakdown of MHT CET 2026 percentile vs marks calculation and college allotment cutoffs across top Maharashtra engineering institutes.",
+        status: "Published"
+      },
+      {
+        title: "VITEEE 2026 Registration Begins @viteee.vit.ac.in",
+        slug: "viteee-2026-registration-begins",
+        category: "Exam Alerts",
+        blogCategory: "Exam Alerts",
+        author: "Admission Cell",
+        authorName: "Admission Cell",
+        publishDate: new Date("2025-10-26"),
+        featuredImage: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+        coverImage: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+        blogDescription: "The Vellore Institute Of Technology (VIT) Has Officially Released The VITEEE 2026 Application Form online.",
+        content: "Step by step application procedure, slot booking details, exam pattern changes, and fee structure for VIT Vellore, Chennai, AP, and Bhopal campuses.",
+        status: "Published"
+      }
     ]);
 
     // 8. Seed Live Alerts (6 items)
@@ -243,6 +322,67 @@ async function seedDatabase() {
       { studentName: "Sneha Mukherjee", role: "B.Tech CSE Aspirant", review: "The AI recommendation feature guided me to top ranked engineering colleges in my target city with zero hassle!", status: "Active" },
       { studentName: "Vikramaditya Rao", role: "MBA Candidate", review: "College Dakhla's detailed fee ROI calculator and admission counselor callback gave me complete clarity.", status: "Active" },
       { studentName: "Ananya Sharma", role: "Medical Student", review: "The admission alerts and exam deadline notifications saved me from missing important application windows!", status: "Active" }
+    ]);
+
+    // 13. Seed Community Questions (4 items)
+    await Question.insertMany([
+      {
+        title: "Is 88 percentile in JEE Main enough for GLA University Mathura or JSS Noida CSE?",
+        body: "I secured 88 percentile in JEE Main 2026 General Category. Looking for guidance on whether I can secure CSE or AI-ML branch in top private universities in UP.",
+        authorName: "Ayush Sengar",
+        authorEmail: "ayush@example.com",
+        stream: "Engineering",
+        tags: ["JEE Main", "GLA University", "JSS Noida", "Cutoff"],
+        upvotes: 14,
+        views: 120,
+        status: "Open",
+        answers: [
+          {
+            body: "Yes! At 88 percentile, you have a strong chance of securing Computer Science Engineering (CSE) or specialization branches like AI & Data Science at GLA University Mathura and BSA College. For JSS Noida, check UPTAC counselling round 2 trends.",
+            authorName: "Dr. Amit Roy",
+            isExpert: true,
+            upvotes: 8
+          }
+        ]
+      },
+      {
+        title: "What is the expected CAT percentile cutoff for IIM Lucknow and MDI Gurgaon for General Engineers?",
+        body: "I am currently in my final year B.Tech CSE. Preparing for CAT 2026. What target percentile should I aim for safe shortlists?",
+        authorName: "Rahul Sharma",
+        authorEmail: "rahul@gmail.com",
+        stream: "Management",
+        tags: ["CAT 2026", "IIM Lucknow", "MDI Gurgaon", "MBA Cutoff"],
+        upvotes: 22,
+        views: 240,
+        status: "Open",
+        answers: [
+          {
+            body: "For General Engineering Male (GEM) candidates, safe calls for IIM Lucknow typically start at 99.2+ percentile with stellar academics. MDI Gurgaon usually shortlists GEM candidates between 97.5 to 98.5 percentile.",
+            authorName: "Priya Varma (Alumni Expert)",
+            isExpert: true,
+            upvotes: 15
+          }
+        ]
+      },
+      {
+        title: "When will UP NEET UG 2026 State Quota Counselling registration start?",
+        body: "Qualified NEET UG with 615 marks. Want to know tentative dates for UP DGME MBBS state quota registration.",
+        authorName: "Dr. Neha Kapoor",
+        authorEmail: "neha@gmail.com",
+        stream: "Medical",
+        tags: ["NEET UG 2026", "UP Counselling", "MBBS Admission"],
+        upvotes: 18,
+        views: 185,
+        status: "Open",
+        answers: [
+          {
+            body: "UP DGME state counselling registrations usually commence 7-10 days after MCC All India Quota Round 1 choice filling starts. Keep your UP Domicile certificate and Class 10/12 marksheets ready.",
+            authorName: "Admission Desk Expert",
+            isExpert: true,
+            upvotes: 10
+          }
+        ]
+      }
     ]);
 
     console.log("FULL ADMIN MODULE DATABASE SEEDING COMPLETED SUCCESSFULLY!");

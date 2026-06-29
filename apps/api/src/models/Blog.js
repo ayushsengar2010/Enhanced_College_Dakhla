@@ -4,7 +4,8 @@ const BlogSchema = new mongoose.Schema(
   {
     title:         { type: String, required: true },
     slug:          { type: String, index: true },
-    category:      { type: String, default: "Exams" },
+    category:      { type: String, default: "Exam Alerts" },
+    blogCategory:  { type: String, default: "Exam Alerts" },
     content:       { type: String },
     blogDescription: { type: String },
     excerpt:       { type: String },
@@ -17,7 +18,7 @@ const BlogSchema = new mongoose.Schema(
     publishDate:   { type: Date, default: Date.now },
     metaTitle:     { type: String },
     metaDescription: { type: String },
-    status:        { type: String, enum: ["Active", "Inactive", "Published", "Draft"], default: "Active" },
+    status:        { type: String, enum: ["Active", "Inactive", "Published", "Draft"], default: "Published" },
     isDeleted:     { type: Boolean, default: false },
   },
   { timestamps: true }
@@ -26,6 +27,11 @@ const BlogSchema = new mongoose.Schema(
 BlogSchema.pre("validate", function (next) {
   if (!this.slug && this.title) {
     this.slug = this.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
+  if (this.category && !this.blogCategory) {
+    this.blogCategory = this.category;
+  } else if (this.blogCategory && !this.category) {
+    this.category = this.blogCategory;
   }
   next();
 });

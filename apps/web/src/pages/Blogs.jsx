@@ -42,6 +42,11 @@ const fmtDate = (d) => {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
 };
 
+const stripHtml = (html) => {
+  if (!html) return "";
+  return html.replace(/<[^>]*>?/gm, "").trim();
+};
+
 /* ═══════════════════════════════════════════════════════════════════
    BLOGS PAGE
 ═══════════════════════════════════════════════════════════════════ */

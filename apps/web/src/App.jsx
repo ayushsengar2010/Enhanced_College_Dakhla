@@ -34,6 +34,7 @@ import AdminBlogs from "./pages/AdminBlogs";
 import AdminBlogForm from "./pages/AdminBlogForm";
 import AdminTestimonials from "./pages/AdminTestimonials";
 import AdminReviews from "./pages/AdminReviews";
+import AdminQuestions from "./pages/AdminQuestions";
 import AdminAlerts from "./pages/AdminAlerts";
 import AdminScholarships from "./pages/AdminScholarships";
 import AdminStudyMaterials from "./pages/AdminStudyMaterials";
@@ -115,6 +116,7 @@ const App = () => (
         <Route path="blogs/:id" element={<AdminBlogForm mode="edit" />} />
         <Route path="testimonials" element={<AdminTestimonials />} />
         <Route path="reviews" element={<AdminReviews />} />
+        <Route path="questions" element={<AdminQuestions />} />
         <Route path="alerts" element={<AdminAlerts />} />
         <Route path="scholarships" element={<AdminScholarships />} />
         <Route path="study-material" element={<AdminStudyMaterials />} />
