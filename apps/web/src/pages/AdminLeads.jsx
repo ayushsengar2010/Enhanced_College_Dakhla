@@ -75,7 +75,8 @@ const AdminLeads = () => {
   };
 
   const handleExportCSV = () => {
-    window.open("http://localhost:5000/api/leads/export/csv", "_blank");
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+    window.open(`${baseUrl}/api/leads/export/csv`, "_blank");
   };
 
   const leads = data?.items || [];
@@ -236,7 +237,7 @@ const AdminLeads = () => {
                         </button>
                         <button
                           onClick={() => emailMutation.mutate(lead._id)}
-                          disabled={emailMutation.isLoading}
+                          disabled={emailMutation.isPending}
                           title="Send Acknowledgement Email to Student"
                           className="w-7 h-7 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 flex items-center justify-center transition-colors"
                         >
@@ -342,10 +343,10 @@ const AdminLeads = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={updateMutation.isLoading}
+                  disabled={updateMutation.isPending}
                   className="px-5 py-2 rounded-xl bg-[#c58237] hover:bg-[#b0712a] text-white font-extrabold shadow-md"
                 >
-                  {updateMutation.isLoading ? "Saving..." : "Save Changes"}
+                  {updateMutation.isPending ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>

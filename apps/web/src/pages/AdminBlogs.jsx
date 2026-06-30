@@ -3,6 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { getBlogs, deleteBlog } from "../lib/api";
 
+const CATEGORIES = [
+  "All", "Exam Alerts", "College Alerts", "Admission Alerts",
+  "Design", "Engineering", "Career", "Technology", "General",
+];
+
 const fmtDate = (d) => {
   if (!d) return "—";
   const date = new Date(d);
@@ -15,10 +20,17 @@ const AdminBlogs = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [category, setCategory] = useState("All");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-blogs-table", search, page, limit],
-    queryFn: () => getBlogs({ search: search || undefined, page, limit, status: "" }),
+    queryKey: ["admin-blogs-table", search, page, limit, category],
+    queryFn: () => getBlogs({
+      search: search || undefined,
+      page,
+      limit,
+      status: "",
+      category: category === "All" ? undefined : category,
+    }),
   });
 
   const deleteMutation = useMutation({
@@ -35,8 +47,8 @@ const AdminBlogs = () => {
   };
 
   const blogs = data?.items || [];
-  const total = data?.total || 55;
-  const pages = data?.pages || 6;
+  const total = data?.total || 0;
+  const pages = data?.pages || 1;
 
   return (
     <div className="space-y-6">
@@ -53,21 +65,35 @@ const AdminBlogs = () => {
         </Link>
       </div>
 
-      {/* Table Container matching Screenshot 3 */}
+      {/* Table Container */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Controls Bar */}
         <div className="p-4 border-b border-slate-200 flex items-center justify-between flex-wrap gap-4 text-xs font-semibold text-slate-600">
-          <div className="flex items-center gap-2">
-            <select
-              value={limit}
-              onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }}
-              className="border border-slate-300 rounded-lg px-2 py-1 bg-white focus:outline-none"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-            <span>entries per page</span>
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <select
+                value={limit}
+                onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }}
+                className="border border-slate-300 rounded-lg px-2 py-1 bg-white focus:outline-none"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+              </select>
+              <span>entries per page</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>Category:</span>
+              <select
+                value={category}
+                onChange={(e) => { setCategory(e.target.value); setPage(1); }}
+                className="border border-slate-300 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-[#c58237]"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -86,24 +112,27 @@ const AdminBlogs = () => {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-slate-100/80 text-slate-700 border-b border-slate-200 font-extrabold uppercase tracking-wider">
-                <th className="py-3.5 px-4">Sr.No. ↕</th>
-                <th className="py-3.5 px-4">Featured Image ↕</th>
-                <th className="py-3.5 px-4">Title ↕</th>
-                <th className="py-3.5 px-4">Publish Date ↕</th>
-                <th className="py-3.5 px-4">Status ↕</th>
+                <th className="py-3.5 px-4">Sr.No.</th>
+                <th className="py-3.5 px-4">Image</th>
+                <th className="py-3.5 px-4">Title</th>
+                <th className="py-3.5 px-4">Category</th>
+                <th className="py-3.5 px-4">Tags</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4">Featured</th>
+                <th className="py-3.5 px-4">Publish Date</th>
                 <th className="py-3.5 px-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-slate-800 font-medium">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-slate-400 font-bold">
+                  <td colSpan={9} className="text-center py-8 text-slate-400 font-bold">
                     Loading Blogs...
                   </td>
                 </tr>
               ) : blogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-slate-400 font-bold">
+                  <td colSpan={9} className="text-center py-8 text-slate-400 font-bold">
                     No blogs found. Click "+ Add Blog" to create one.
                   </td>
                 </tr>
@@ -118,13 +147,39 @@ const AdminBlogs = () => {
                         className="w-14 h-10 object-cover rounded-md border border-slate-200 shadow-sm"
                       />
                     </td>
-                    <td className="py-3.5 px-4 font-black text-[#08162d] max-w-[320px]">{blog.title}</td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-600">{fmtDate(blog.publishDate || blog.createdAt)}</td>
+                    <td className="py-3.5 px-4 font-black text-[#08162d] max-w-[250px] truncate">{blog.title}</td>
                     <td className="py-3.5 px-4">
-                      <span className={`font-black text-xs ${blog.status === "Inactive" ? "text-rose-500" : "text-emerald-600"}`}>
+                      <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold">
+                        {blog.blogCategory || blog.category || "—"}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex flex-wrap gap-1 max-w-[180px]">
+                        {(blog.tags || []).slice(0, 3).map((tag, i) => (
+                          <span key={i} className="inline-block px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-[9px] font-bold">
+                            {tag}
+                          </span>
+                        ))}
+                        {(blog.tags || []).length > 3 && (
+                          <span className="text-[9px] text-slate-400 font-bold">+{blog.tags.length - 3}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className={`font-black text-xs ${blog.status === "Inactive" || blog.status === "Draft" ? "text-rose-500" : "text-emerald-600"}`}>
                         {blog.status || "Active"}
                       </span>
                     </td>
+                    <td className="py-3.5 px-4">
+                      {blog.isFeatured ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                          ⭐ Featured
+                        </span>
+                      ) : (
+                        <span className="text-slate-300">—</span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-600 whitespace-nowrap">{fmtDate(blog.publishDate || blog.createdAt)}</td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
@@ -134,15 +189,13 @@ const AdminBlogs = () => {
                         >
                           ✏️
                         </button>
-                        <a
-                          href={`/blogs/${blog._id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="View Blog"
-                          className="w-7 h-7 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 flex items-center justify-center transition-colors"
+                        <button
+                          onClick={() => handleDelete(blog._id, blog.title)}
+                          title="Delete Blog"
+                          className="w-7 h-7 rounded border border-red-300 bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors"
                         >
-                          👁️
-                        </a>
+                          🗑️
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -152,7 +205,7 @@ const AdminBlogs = () => {
           </table>
         </div>
 
-        {/* Footer Pagination matching Screenshot 3 */}
+        {/* Footer Pagination */}
         <div className="p-4 border-t border-slate-200 flex items-center justify-between flex-wrap gap-4 text-xs text-slate-500 font-semibold">
           <div>
             Showing {total > 0 ? (page - 1) * limit + 1 : 0} to {Math.min(page * limit, total)} of {total} entries

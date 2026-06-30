@@ -48,6 +48,7 @@ import AdminCollegeEnquiries from "./pages/AdminCollegeEnquiries";
 import AdminContactEnquiries from "./pages/AdminContactEnquiries";
 import AdminPredictorEnquiries from "./pages/AdminPredictorEnquiries";
 import AdminLogin from "./pages/AdminLogin";
+import AdminBanners from "./pages/AdminBanners";
 
 /* Scroll to top on every route change */
 const ScrollToTop = () => {
@@ -117,6 +118,7 @@ const App = () => (
         <Route path="testimonials" element={<AdminTestimonials />} />
         <Route path="reviews" element={<AdminReviews />} />
         <Route path="questions" element={<AdminQuestions />} />
+        <Route path="banners" element={<AdminBanners />} />
         <Route path="alerts" element={<AdminAlerts />} />
         <Route path="scholarships" element={<AdminScholarships />} />
         <Route path="study-material" element={<AdminStudyMaterials />} />

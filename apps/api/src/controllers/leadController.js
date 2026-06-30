@@ -4,6 +4,7 @@ const nodemailer    = require("nodemailer");
 const { parsePagination } = require("../utils/pagination");
 const { sanitizeString, isValidEmail, isValidPhone, safeRegex } = require("../utils/validation");
 const logger = require("../utils/logger");
+const { emitDashboardUpdate } = require("../socket");
 
 /**
  * 📩 Create New Lead & Generate Top 5 Matching College Recommendations
@@ -117,6 +118,9 @@ const createLead = async (req, res, next) => {
       "collegeName shortName slug city state category ranking fees highestPackage rating userReviews bestFor"
     );
 
+    // Notify admin dashboard of new lead
+    emitDashboardUpdate({ entity: "lead", action: "created" });
+
     res.status(201).json({
       message: "Enquiry submitted successfully!",
       lead: populatedLead,
@@ -165,7 +169,7 @@ const listLeads = async (req, res, next) => {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      pages: Math.ceil(total / limit),
     });
   } catch (err) {
     next(err);
@@ -204,6 +208,7 @@ const updateLead = async (req, res, next) => {
     }).populate("assignedColleges");
 
     if (!updatedLead) return res.status(404).json({ message: "Lead not found" });
+    emitDashboardUpdate({ entity: "lead", action: "updated" });
     res.json({ message: "Lead updated successfully", lead: updatedLead });
   } catch (err) {
     next(err);
@@ -217,6 +222,7 @@ const deleteLead = async (req, res, next) => {
   try {
     const deleted = await Lead.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: "Lead not found" });
+    emitDashboardUpdate({ entity: "lead", action: "deleted" });
     res.json({ message: "Lead record deleted successfully" });
   } catch (err) {
     next(err);

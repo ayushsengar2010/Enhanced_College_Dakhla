@@ -4,5 +4,6 @@ node_modules/
 .env.*
 .DS_Store
 coverage/
-apps/api/uploads/
+# Uploaded files (images, PDFs)
+uploads/
 dist/

@@ -1,6 +1,6 @@
 # College Dakhla — API
 
-Node.js + Express + MongoDB backend for the College Dakhla admission platform.
+Node.js + Express + MongoDB + Socket.IO backend for the College Dakhla college admission platform.
 
 ---
 
@@ -9,11 +9,13 @@ Node.js + Express + MongoDB backend for the College Dakhla admission platform.
 - **Runtime:** Node.js 18+
 - **Framework:** Express 4
 - **Database:** MongoDB with Mongoose 8
-- **Auth:** JWT (jsonwebtoken)
+- **Authentication:** JWT (jsonwebtoken) + bcryptjs
+- **Real-Time:** Socket.IO 4 (WebSocket)
 - **File Uploads:** Multer (local) / Cloudinary
-- **Security:** Helmet, CORS
+- **Security:** Helmet, CORS, express-rate-limit
+- **Performance:** compression, HTTP caching headers
 - **Email:** Nodemailer
-- **Validation:** Mongoose schema validation
+- **Logging:** Morgan + custom structured logger
 
 ---
 
@@ -27,9 +29,8 @@ npm install
 cp .env.example .env
 
 # 3. Edit .env with your MongoDB URI and secrets
-#    (see Environment Variables section below)
 
-# 4. Start development server (with nodemon)
+# 4. Start development server
 npm run dev
 
 # 5. Or start in production
@@ -43,17 +44,23 @@ The API runs on `http://localhost:5000` by default.
 ## Environment Variables
 
 | Variable | Required | Default | Description |
-|---|---|---|---|
+|----------|----------|---------|-------------|
 | `PORT` | No | `5000` | Server port |
 | `MONGO_URI` | **Yes** | — | MongoDB connection string |
-| `JWT_SECRET` | **Yes** | — | Secret key for JWT signing |
+| `JWT_SECRET` | **Yes** | — | Secret key for JWT signing (min 16 chars) |
 | `ADMIN_EMAIL` | **Yes** | — | Email for admin login |
 | `ADMIN_PASSWORD_HASH` | **Yes** | — | bcrypt hash of the admin password |
-| `CORS_ORIGIN` | No | `http://localhost:5173` | Allowed CORS origin |
+| `CORS_ORIGIN` | No | `*` | Allowed CORS origin(s), comma-separated |
+| `LOG_LEVEL` | No | `info` | Logging level: debug, info, warn, error |
 | `CLOUDINARY_CLOUD_NAME` | No | — | Cloudinary cloud name |
 | `CLOUDINARY_API_KEY` | No | — | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | No | — | Cloudinary API secret |
 | `USE_CLOUDINARY` | No | `false` | Set to `true` to enable Cloudinary uploads |
+| `SMTP_HOST` | No | — | SMTP server for sending emails |
+| `SMTP_PORT` | No | `587` | SMTP port |
+| `SMTP_SECURE` | No | `false` | Use TLS for SMTP |
+| `SMTP_USER` | No | — | SMTP username |
+| `SMTP_PASS` | No | — | SMTP password |
 
 ### Generating the Admin Password Hash
 
@@ -66,23 +73,25 @@ node -e "const bcrypt=require('bcryptjs'); console.log(bcrypt.hashSync('YourPass
 ## Database Models
 
 | Model | Collection | Description |
-|---|---|---|
-| **College** | `colleges` | Engineering/management/medical colleges with rankings, fees, placement data |
-| **Course** | `courses` | Course catalog under various streams |
+|-------|-----------|-------------|
+| **College** | `colleges` | Engineering/management/medical colleges with rankings, fees, placement data, sections |
+| **Course** | `courses` | Course catalog under various streams with eligibility, entrance exams |
 | **Stream** | `streams` | Academic streams (Engineering, Management, Medical, etc.) |
 | **Substream** | `substreams` | Specializations under each stream (CSE, Finance, etc.) |
 | **CourseDuration** | `coursedurations` | Duration options (1 Year, 2 Years, 3 Years, 4 Years) |
-| **Exam** | `exams` | Entrance exam details (JEE, NEET, CAT, CUET, etc.) |
+| **Exam** | `exams` | Entrance exam details (JEE, NEET, CAT, CUET, BITSAT, etc.) |
 | **CollegeApi** | `collegeapis` | External API endpoint mappings for lead routing |
-| **Lead** | `leads` | Student enquiries and admission leads |
-| **Blog** | `blogs` | Education articles, exam alerts, career guidance |
+| **Lead** | `leads` | Student enquiries with auto-matched college recommendations |
+| **Blog** | `blogs` | Education articles, exam alerts, career guidance with SEO fields |
 | **Testimonial** | `testimonials` | Student success stories and reviews |
-| **Review** | `reviews` | College reviews from students/alumni |
-| **Question** | `questions` | Community Q&A posts with answers and upvotes |
-| **Scholarship** | `scholarships` | Scholarship listings with eligibility and deadlines |
-| **StudyMaterial** | `studymaterials` | Study resources (notes, sample papers, ebooks) |
-| **Alert** | `alerts` | Live admission alerts and notifications |
-| **AuditLog** | `auditlogs` | Admin activity audit trail |
+| **Review** | `reviews` | College reviews with multi-dimensional ratings (overall, placement, faculty, campus, value) |
+| **Question** | `questions` | Community Q&A posts with answers, upvotes, view counting |
+| **Scholarship** | `scholarships` | Scholarship listings with eligibility, type, and deadlines |
+| **StudyMaterial** | `studymaterials` | Study resources (notes, sample papers, ebooks) with download tracking |
+| **Alert** | `alerts` | Live admission alerts with type filtering and subscriber management |
+| **AlertSubscriber** | `alertsubscribers` | Email subscribers for admission alert notifications |
+| **Banner** | `banners` | Home page banner slideshow images with order, active status, and links |
+| **AuditLog** | `auditlogs` | Admin activity audit trail with fallback file logging |
 
 ---
 
@@ -90,226 +99,305 @@ node -e "const bcrypt=require('bcryptjs'); console.log(bcrypt.hashSync('YourPass
 
 ### Health Check
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Server health status |
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/health` | — | Server health, MongoDB status, uptime |
 
 ### Authentication
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/auth/login` | — | Admin login (returns JWT token) |
+|--------|----------|------|-------------|
+| `POST` | `/api/auth/login` | — | Admin login (returns JWT token, 7-day expiry) |
 
 ### Colleges
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/colleges` | — | List colleges (with pagination, filters) |
+|--------|----------|------|-------------|
+| `GET` | `/api/colleges` | Optional | List colleges (pagination, search, filter by state/city/course/fees/ranking) |
 | `GET` | `/api/colleges/slug/:slug` | — | Get college by slug |
 | `GET` | `/api/colleges/:id` | — | Get college by ID |
+| `GET` | `/api/colleges/compare?ids=id1,id2` | — | Compare up to 5 colleges |
 | `POST` | `/api/colleges` | Admin | Create college |
 | `PUT` | `/api/colleges/:id` | Admin | Update college |
-| `DELETE` | `/api/colleges/:id` | Admin | Delete college |
+| `DELETE` | `/api/colleges/:id` | Admin | Soft-delete college |
 
 ### Courses
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/courses` | — | List courses (with filters) |
+|--------|----------|------|-------------|
+| `GET` | `/api/courses` | — | List courses (pagination, search) |
 | `POST` | `/api/courses` | Admin | Create course |
 | `PUT` | `/api/courses/:id` | Admin | Update course |
-| `DELETE` | `/api/courses/:id` | Admin | Delete course |
+| `DELETE` | `/api/courses/:id` | Admin | Soft-delete course |
 
 ### Masters (Streams, Substreams, Durations)
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
+|--------|----------|------|-------------|
 | `GET` | `/api/masters/streams` | Admin | List streams |
 | `POST` | `/api/masters/streams` | Admin | Create stream |
 | `PUT` | `/api/masters/streams/:id` | Admin | Update stream |
-| `DELETE` | `/api/masters/streams/:id` | Admin | Delete stream |
+| `DELETE` | `/api/masters/streams/:id` | Admin | Soft-delete stream |
 | `GET` | `/api/masters/substreams` | Admin | List substreams |
 | `POST` | `/api/masters/substreams` | Admin | Create substream |
 | `PUT` | `/api/masters/substreams/:id` | Admin | Update substream |
-| `DELETE` | `/api/masters/substreams/:id` | Admin | Delete substream |
+| `DELETE` | `/api/masters/substreams/:id` | Admin | Soft-delete substream |
 | `GET` | `/api/masters/durations` | Admin | List course durations |
 | `POST` | `/api/masters/durations` | Admin | Create duration |
 | `PUT` | `/api/masters/durations/:id` | Admin | Update duration |
-| `DELETE` | `/api/masters/durations/:id` | Admin | Delete duration |
+| `DELETE` | `/api/masters/durations/:id` | Admin | Soft-delete duration |
 
 ### College APIs (External Mappings)
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
+|--------|----------|------|-------------|
 | `GET` | `/api/college-apis` | Admin | List API mappings |
 | `POST` | `/api/college-apis` | Admin | Create API mapping |
 | `PUT` | `/api/college-apis/:id` | Admin | Update API mapping |
-| `DELETE` | `/api/college-apis/:id` | Admin | Delete API mapping |
+| `DELETE` | `/api/college-apis/:id` | Admin | Soft-delete API mapping |
 
 ### Leads & Enquiries
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/leads` | Admin | List leads (with filters by source) |
-| `POST` | `/api/leads` | — | Create lead (public) |
-| `PUT` | `/api/leads/:id` | Admin | Update lead |
+|--------|----------|------|-------------|
+| `GET` | `/api/leads` | Admin | List leads (filter by status, source, city, search) |
+| `POST` | `/api/leads` | — | Create lead (public) with auto-matched top 5 colleges |
+| `PUT` | `/api/leads/:id` | Admin | Update lead status & remarks |
 | `DELETE` | `/api/leads/:id` | Admin | Delete lead |
-| `POST` | `/api/leads/:id/email` | Admin | Send email to lead |
+| `POST` | `/api/leads/:id/email` | Admin | Send email to lead via SMTP |
+| `GET` | `/api/leads/export/csv` | Admin | Export leads as CSV |
 
 ### Blogs
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/blogs` | — | List blogs |
-| `GET` | `/api/blogs/slug/:slug` | — | Get blog by slug |
-| `GET` | `/api/blogs/:id` | — | Get blog by ID |
+|--------|----------|------|-------------|
+| `GET` | `/api/blogs` | Optional | List blogs (filter by category, tag, search; pagination) |
+| `GET` | `/api/blogs/featured` | — | Get featured posts |
+| `GET` | `/api/blogs/categories` | — | Get unique blog categories |
+| `GET` | `/api/blogs/slug/:slug` | Optional | Get blog by slug |
+| `GET` | `/api/blogs/:id` | Admin | Get blog by ID |
 | `POST` | `/api/blogs` | Admin | Create blog |
 | `PUT` | `/api/blogs/:id` | Admin | Update blog |
-| `DELETE` | `/api/blogs/:id` | Admin | Delete blog |
+| `DELETE` | `/api/blogs/:id` | Admin | Soft-delete blog |
 
 ### Testimonials
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/testimonials` | — | List testimonials |
+|--------|----------|------|-------------|
+| `GET` | `/api/testimonials` | Optional | List testimonials |
 | `POST` | `/api/testimonials` | Admin | Create testimonial |
 | `PUT` | `/api/testimonials/:id` | Admin | Update testimonial |
-| `DELETE` | `/api/testimonials/:id` | Admin | Delete testimonial |
+| `DELETE` | `/api/testimonials/:id` | Admin | Soft-delete testimonial |
 
 ### Exams
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/exams` | — | List exams |
+|--------|----------|------|-------------|
+| `GET` | `/api/exams` | — | List exams (filter by stream, search) |
 | `GET` | `/api/exams/:id` | — | Get exam by ID |
 | `POST` | `/api/exams` | Admin | Create exam |
 | `PUT` | `/api/exams/:id` | Admin | Update exam |
-| `DELETE` | `/api/exams/:id` | Admin | Delete exam |
+| `DELETE` | `/api/exams/:id` | Admin | Soft-delete exam |
 
 ### Scholarships
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/scholarships` | — | List scholarships |
+|--------|----------|------|-------------|
+| `GET` | `/api/scholarships` | Optional | List scholarships (filter by type, stream) |
 | `GET` | `/api/scholarships/:id` | — | Get scholarship by ID |
 | `POST` | `/api/scholarships` | Admin | Create scholarship |
 | `PUT` | `/api/scholarships/:id` | Admin | Update scholarship |
-| `DELETE` | `/api/scholarships/:id` | Admin | Delete scholarship |
+| `DELETE` | `/api/scholarships/:id` | Admin | Soft-delete scholarship |
 
 ### Study Materials
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/study-materials` | — | List study materials |
-| `GET` | `/api/study-materials/:id` | — | Get study material by ID |
+|--------|----------|------|-------------|
+| `GET` | `/api/study-materials` | — | List study materials (filter by stream, type, exam) |
+| `GET` | `/api/study-materials/:id` | — | Get study material by ID (increments download count) |
 | `POST` | `/api/study-materials` | Admin | Create study material |
 | `PUT` | `/api/study-materials/:id` | Admin | Update study material |
-| `DELETE` | `/api/study-materials/:id` | Admin | Delete study material |
+| `DELETE` | `/api/study-materials/:id` | Admin | Soft-delete study material |
 
 ### Reviews
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/reviews` | — | List reviews |
+|--------|----------|------|-------------|
+| `GET` | `/api/reviews` | Optional | List reviews (filter by college, status) |
 | `POST` | `/api/reviews` | — | Submit a review |
-| `PUT` | `/api/reviews/:id` | Admin | Update review |
-| `DELETE` | `/api/reviews/:id` | Admin | Delete review |
+| `PUT` | `/api/reviews/:id` | Admin | Update review (approving recalculates college rating) |
+| `DELETE` | `/api/reviews/:id` | Admin | Soft-delete review |
 
 ### Questions (Q&A)
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/questions` | — | List questions |
-| `GET` | `/api/questions/:id` | — | Get question by ID |
+|--------|----------|------|-------------|
+| `GET` | `/api/questions` | — | List questions (filter by stream, status, search) |
+| `GET` | `/api/questions/:id` | — | Get question by ID (increments view count) |
 | `POST` | `/api/questions` | — | Ask a question |
 | `POST` | `/api/questions/:id/answers` | — | Submit an answer |
 | `POST` | `/api/questions/:id/upvote` | — | Upvote a question |
-| `DELETE` | `/api/questions/:id` | Admin | Delete question |
+| `DELETE` | `/api/questions/:id` | Admin | Soft-delete question |
+
+### Banners
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/banners` | Optional | List banners (public sees active only) |
+| `POST` | `/api/banners` | Admin | Create banner |
+| `PUT` | `/api/banners/:id` | Admin | Update banner |
+| `DELETE` | `/api/banners/:id` | Admin | Delete banner |
 
 ### Alerts
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/alerts` | — | List alerts |
+|--------|----------|------|-------------|
+| `GET` | `/api/alerts` | Optional | List alerts (filter by type, stream) |
 | `POST` | `/api/alerts` | Admin | Create alert |
 | `PUT` | `/api/alerts/:id` | Admin | Update alert |
-| `DELETE` | `/api/alerts/:id` | Admin | Delete alert |
-| `POST` | `/api/alerts/subscribe` | — | Subscribe to alerts |
+| `DELETE` | `/api/alerts/:id` | Admin | Soft-delete alert |
+| `POST` | `/api/alerts/subscribe` | — | Subscribe to alerts (upsert by email) |
+| `GET` | `/api/alerts/subscribers/all` | Admin | List active subscribers |
 
 ### Analytics
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/analytics/dashboard` | Admin | Dashboard statistics |
+|--------|----------|------|-------------|
+| `GET` | `/api/analytics/dashboard` | Admin | Full dashboard stats (totals, trends, breakdowns, recent leads, top colleges) |
+| `GET` | `/api/analytics/export/csv?type=leads\|colleges\|blogs` | Admin | Export analytics as CSV |
 
 ### Uploads
 
 | Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/uploads` | Admin | Upload file (local or Cloudinary) |
+|--------|----------|------|-------------|
+| `POST` | `/api/uploads` | Admin | Upload file (image jpeg/png/webp or PDF, max 8MB) — local or Cloudinary |
 
 ---
 
-## Authentication
+## 🔌 Real-Time WebSocket Events
 
-All admin-protected endpoints require a Bearer token in the `Authorization` header:
+The API uses Socket.IO for real-time communication.
+
+### Connection
+
+```js
+const socket = io("http://localhost:5000", {
+  auth: { token: "<admin-jwt-token>" }
+});
+```
+
+### Events
+
+| Event | Direction | Payload | Description |
+|-------|-----------|---------|-------------|
+| `dashboard:update` | Server → Client | `{ type, entity, action, bannerId, timestamp }` | Emitted when data changes (lead created/updated, banner changes) |
+| `notification` | Server → Client | `{ message, type, timestamp }` | Toast-style admin notifications |
+
+### Helper Functions
+
+```js
+const { initSocket, emitDashboardUpdate, emitNotification } = require("./socket");
+```
+
+- `initSocket(httpServer)` — Attach Socket.IO to HTTP server
+- `emitDashboardUpdate(payload)` — Broadcast to all admin clients
+- `emitNotification(message, type)` — Send notification to admin clients
+
+---
+
+## 🔐 Authentication
+
+All admin-protected endpoints require a Bearer token:
 
 ```
 Authorization: Bearer <jwt-token>
 ```
 
-The token is obtained from `POST /api/auth/login` with valid admin credentials.
-
 Two middleware variants:
-- **`requireAuth`** — Rejects unauthenticated requests with 401
-- **`optionalAuth`** — Allows requests without a token (sets `req.user = null`)
+- **`requireAuth`** — Rejects unauthenticated requests with 401. Verifies admin role (403 if not admin).
+- **`optionalAuth`** — Allows requests without a token (sets `req.user = null`).
+
+Token expiry: **7 days**.
 
 ---
 
-## Seed Data
+## 🔒 Security Features
 
-Run the seed script to populate the database with sample data:
+- **Helmet** — Security headers (CSP, XSS, etc.)
+- **Rate Limiting** — 60 req/min general API, 10 req/15min auth, 10 req/15min lead creation
+- **Input Validation** — XSS prevention via HTML stripping, regex injection prevention
+- **CORS** — Configurable origins
+- **Soft Deletes** — All entities use `isDeleted` flag instead of hard deletion
+- **CSV Export** — Proper field escaping to prevent injection
+
+---
+
+## 🗄️ Seed Data
+
+Run the seed script to populate the database with comprehensive sample data:
 
 ```bash
 node src/seed.js
 ```
 
-This seeds:
-- 10 academic streams
-- 20 substreams
-- 4 course durations
-- 20 courses
-- 30+ colleges across UP, Delhi NCR, Maharashtra, Karnataka, Haryana, Rajasthan
-- 6 entrance exams
-- 5 blogs
-- 5 live alerts
-- 5 college reviews
-- 4 scholarships
-- 4 study materials
-- 4 testimonials
+### Seeds
+
+| Entity | Count | Details |
+|--------|-------|---------|
+| Streams | 10 | Engineering, Management, Medical, Commerce, etc. |
+| Substreams | 20 | CSE, AI/DS, Finance, Marketing, MBBS, etc. |
+| Course Durations | 4 | 1, 2, 3, 4 Year |
+| Courses | 20 | B.Tech CSE, MBA, MBBS, B.Des, etc. |
+| Colleges | 30+ | IIT Bombay, IIT Delhi, IIT Kanpur, BHU, DTU, etc. across UP, Delhi, Maharashtra, Karnataka, Haryana, Rajasthan |
+| Exams | 6 | JEE Main, JEE Advanced, NEET, CAT, CUET, BITSAT |
+| Blogs | 5 | Exam alerts, career guidance, admission news |
+| Reviews | 4 | College reviews with ratings |
+| Scholarships | 4 | Reliance, UP Scholarship, MHRD, HDFC |
+| Study Materials | 4 | JEE, NEET, CAT, CUET resources |
+| Testimonials | 4 | Student success stories |
+| Questions | 3 | Community Q&A with answers |
+| Alerts | 5 | Live admission alerts |
 
 ---
 
-## Project Structure
+## 🏗️ Project Structure
 
 ```
 apps/api/
 ├── src/
-│   ├── config/          # Database & Cloudinary configuration
-│   │   ├── db.js
-│   │   └── cloudinary.js
-│   ├── controllers/     # Route handlers (17 controllers)
-│   ├── middleware/       # Auth, error handling, file uploads
-│   │   ├── auth.js
-│   │   ├── errorHandler.js
-│   │   └── upload.js
-│   ├── models/          # Mongoose schemas (16 models)
-│   ├── routes/          # Express route definitions (17 route files)
-│   ├── utils/           # Helpers (audit, pagination, slugify)
-│   ├── app.js           # Express app setup
-│   ├── seed.js          # Database seeding script
-│   └── server.js        # Entry point
-├── uploads/             # Local file uploads directory
-├── .env.example
+│   ├── config/
+│   │   ├── db.js              # MongoDB connection
+│   │   └── cloudinary.js      # Cloudinary configuration
+│   ├── controllers/           # 17 route handlers
+│   │   ├── authController.js
+│   │   ├── collegeController.js
+│   │   ├── courseController.js
+│   │   ├── leadController.js
+│   │   ├── blogController.js
+│   │   ├── bannerController.js
+│   │   ├── examController.js
+│   │   ├── reviewController.js
+│   │   ├── alertController.js
+│   │   ├── ... (17 total)
+│   ├── middleware/
+│   │   ├── auth.js            # JWT auth (requireAuth, optionalAuth)
+│   │   ├── cache.js           # Cache-control headers
+│   │   ├── errorHandler.js    # Global error handler
+│   │   ├── rateLimiter.js     # Rate limiting
+│   │   └── upload.js          # Multer file upload config
+│   ├── models/                # 17 Mongoose schemas
+│   ├── routes/                # 17 Express route files
+│   ├── utils/
+│   │   ├── audit.js           # Audit logging with MongoDB + fallback file
+│   │   ├── logger.js          # Structured logging utility
+│   │   ├── pagination.js      # Pagination parser
+│   │   ├── slugify.js         # URL slug generator
+│   │   └── validation.js      # Input sanitization, regex, email/phone validation
+│   ├── app.js                 # Express app setup (middleware, routes, error handling)
+│   ├── server.js              # Entry point (env validation, DB connect, HTTP + Socket.IO)
+│   ├── socket.js              # Socket.IO server with JWT auth
+│   └── seed.js                # Database seeding script
+├── uploads/                   # Local file uploads directory
+├── .env.example               # Environment template
 └── package.json
 ```

@@ -213,6 +213,43 @@ const updateCollege = async (req, res, next) => {
   }
 };
 
+/**
+ * Compare multiple colleges by IDs (comma-separated in query)
+ * GET /api/colleges/compare?ids=id1,id2,id3
+ */
+const compareColleges = async (req, res, next) => {
+  try {
+    const ids = (req.query.ids || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+
+    if (ids.length < 2) {
+      return res.status(400).json({ message: "Provide at least 2 college IDs to compare" });
+    }
+    if (ids.length > 5) {
+      return res.status(400).json({ message: "Can compare up to 5 colleges at once" });
+    }
+
+    const colleges = await College.find({
+      _id: { $in: ids },
+      isDeleted: false,
+      status: "Active",
+    })
+      .populate("courses")
+      .lean();
+
+    // Return in the same order as requested
+    const ordered = ids
+      .map((id) => colleges.find((c) => c._id.toString() === id))
+      .filter(Boolean);
+
+    res.json(ordered);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const deleteCollege = async (req, res, next) => {
   try {
     const college = await College.findOne({ _id: req.params.id, isDeleted: false });
@@ -238,4 +275,5 @@ module.exports = {
   createCollege,
   updateCollege,
   deleteCollege,
+  compareColleges,
 };

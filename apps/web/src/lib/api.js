@@ -33,16 +33,29 @@ const put  = (url, data)   => api.put(url, data).then((r) => r.data);
 const del  = (url)         => api.delete(url).then((r) => r.data);
 
 // Auth & Analytics
-export const loginAdmin    = (p)       => post("/api/auth/login", p);
-export const getDashboard  = ()        => get("/api/analytics/dashboard");
+export const loginAdmin           = (p)       => post("/api/auth/login", p);
+export const getDashboard         = (params)  => get("/api/analytics/dashboard", params);
+export const exportAnalyticsCSV   = (type)    => api.get(`/api/analytics/export/csv?type=${type}`, { responseType: "blob" }).then((r) => r.data);
+
+// Helper: Trigger CSV download
+export const downloadAnalyticsCSV = async (type, filename) => {
+  const blob = await exportAnalyticsCSV(type);
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `${type}_report.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+};
 
 // Colleges
-export const getColleges      = (p)    => get("/api/colleges", p);
-export const getCollegeBySlug = (slug) => get(`/api/colleges/slug/${slug}`);
-export const getCollegeById   = (id)   => get(`/api/colleges/${id}`);
-export const createCollege    = (p)    => post("/api/colleges", p);
-export const updateCollege    = (id,p) => put(`/api/colleges/${id}`, p);
-export const deleteCollege    = (id)   => del(`/api/colleges/${id}`);
+export const getColleges       = (p)    => get("/api/colleges", p);
+export const getCollegeBySlug  = (slug) => get(`/api/colleges/slug/${slug}`);
+export const getCollegeById    = (id)   => get(`/api/colleges/${id}`);
+export const createCollege     = (p)    => post("/api/colleges", p);
+export const updateCollege     = (id,p) => put(`/api/colleges/${id}`, p);
+export const deleteCollege     = (id)   => del(`/api/colleges/${id}`);
+export const compareColleges   = (ids)  => get("/api/colleges/compare", { ids: ids.join(",") });
 
 // Courses
 export const getCourses    = (p)    => get("/api/courses", p);
@@ -80,12 +93,14 @@ export const deleteLead     = (id)   => del(`/api/leads/${id}`);
 export const sendLeadEmail  = (id)   => post(`/api/leads/${id}/email`, {});
 
 // Blogs
-export const getBlogs       = (p)    => get("/api/blogs", p);
-export const getBlogBySlug  = (slug) => get(`/api/blogs/slug/${slug}`);
-export const getBlogById    = (id)   => get(`/api/blogs/${id}`);
-export const createBlog     = (p)    => post("/api/blogs", p);
-export const updateBlog     = (id,p) => put(`/api/blogs/${id}`, p);
-export const deleteBlog     = (id)   => del(`/api/blogs/${id}`);
+export const getBlogs           = (p)    => get("/api/blogs", p);
+export const getBlogBySlug      = (slug) => get(`/api/blogs/slug/${slug}`);
+export const getBlogById        = (id)   => get(`/api/blogs/${id}`);
+export const createBlog         = (p)    => post("/api/blogs", p);
+export const updateBlog         = (id,p) => put(`/api/blogs/${id}`, p);
+export const deleteBlog         = (id)   => del(`/api/blogs/${id}`);
+export const getFeaturedBlogs   = (p)    => get("/api/blogs/featured", p);
+export const getBlogCategories  = ()    => get("/api/blogs/categories");
 
 // Testimonials
 export const getTestimonials     = (p)    => get("/api/testimonials", p);
@@ -127,6 +142,12 @@ export const createQuestion   = (p)    => post("/api/questions", p);
 export const addAnswer        = (id,p) => post(`/api/questions/${id}/answers`, p);
 export const upvoteQuestion   = (id)   => post(`/api/questions/${id}/upvote`, {});
 export const deleteQuestion   = (id)   => del(`/api/questions/${id}`);
+
+// Banners
+export const getBanners         = (p)    => get("/api/banners", p);
+export const createBanner       = (p)    => post("/api/banners", p);
+export const updateBanner       = (id,p) => put(`/api/banners/${id}`, p);
+export const deleteBanner       = (id)   => del(`/api/banners/${id}`);
 
 // Alerts
 export const getAlerts         = (p) => get("/api/alerts", p);

@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const cors    = require("cors");
 const helmet  = require("helmet");
@@ -28,13 +29,14 @@ const questionRoutes      = require("./routes/questionRoutes");
 const alertRoutes         = require("./routes/alertRoutes");
 const predictorRoutes     = require("./routes/predictorRoutes");
 const mastersRoutes       = require("./routes/mastersRoutes");
+const bannerRoutes        = require("./routes/bannerRoutes");
 
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
 
 // Security & Performance middleware
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(compression());
 app.use(
   cors({
@@ -46,7 +48,7 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "..", "..", "..", "uploads")));
 
 // Apply general rate limiting to all API routes
 app.use("/api", apiLimiter);
@@ -62,6 +64,7 @@ app.use("/api/reviews", publicCache(300));
 app.use("/api/testimonials", publicCache(300));
 app.use("/api/questions", publicCache(300));
 app.use("/api/alerts", publicCache(300));
+app.use("/api/banners", publicCache(300));
 app.use("/api/alerts/subscribe", noCache);
 app.use("/api/leads", noCache);
 app.use("/api/auth", noCache);
@@ -99,6 +102,7 @@ app.use("/api/questions",       questionRoutes);
 app.use("/api/alerts",          alertRoutes);
 app.use("/api/predictor",       predictorRoutes);
 app.use("/api/masters",         mastersRoutes);
+app.use("/api/banners",         bannerRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

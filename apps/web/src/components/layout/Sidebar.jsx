@@ -144,6 +144,14 @@ const Sidebar = () => {
             </div>
           </NavLink>
 
+          {/* Home Page Banners */}
+          <NavLink to="/admin/banners" className={navItemClass}>
+            <div className="flex items-center gap-3">
+              <span className="text-base">🖼️</span>
+              <span>Home Banners</span>
+            </div>
+          </NavLink>
+
           {/* Admission Alerts */}
           <NavLink to="/admin/alerts" className={navItemClass}>
             <div className="flex items-center gap-3">

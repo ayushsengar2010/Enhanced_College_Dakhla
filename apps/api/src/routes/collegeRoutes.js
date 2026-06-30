@@ -5,15 +5,17 @@ const {
   getCollegeById,
   createCollege,
   updateCollege,
-  deleteCollege
+  deleteCollege,
+  compareColleges,
 } = require("../controllers/collegeController");
 const { requireAuth, optionalAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.get("/", optionalAuth, listColleges);
+router.get("/",         optionalAuth, listColleges);
+router.get("/compare",  optionalAuth, compareColleges);
 router.get("/slug/:slug", optionalAuth, getCollegeBySlug);
-router.get("/:id", requireAuth, getCollegeById);
+router.get("/:id",        requireAuth,  getCollegeById);
 router.post("/", requireAuth, createCollege);
 router.put("/:id", requireAuth, updateCollege);
 router.delete("/:id", requireAuth, deleteCollege);

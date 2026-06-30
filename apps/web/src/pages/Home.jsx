@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, Link } from "react-router-dom";
-import { getColleges, getExams, getBlogs, getCourses, getTestimonials, createLead } from "../lib/api";
+import { getColleges, getExams, getTestimonials, getBanners, createLead } from "../lib/api";
 import SmartLeadRecommendationSystem from "../components/SmartLeadRecommendationSystem";
 
 
@@ -132,6 +132,32 @@ const Home = () => {
   const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
   const [newsletterDone, setNewsletterDone] = useState(false);
 
+  // Banner slideshow state
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const [bannerErrors, setBannerErrors] = useState({});
+  const bannerTimer = useRef(null);
+
+  const { data: bannersRes, isLoading: bannersLoading } = useQuery({
+    queryKey: ["home-banners"],
+    queryFn: () => getBanners(),
+    staleTime: 60000,
+  });
+
+  const banners = bannersRes?.items || [];
+
+  const handleBannerError = useCallback((id) => {
+    setBannerErrors((prev) => ({ ...prev, [id]: true }));
+  }, []);
+
+  // Auto-cycle banners every 5 seconds
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    bannerTimer.current = setInterval(() => {
+      setBannerIndex((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(bannerTimer.current);
+  }, [banners.length]);
+
   const { results, isFetching, active } = useLiveSearch(search);
 
   // Fetch real data from Backend
@@ -207,7 +233,64 @@ const Home = () => {
     <div className="bg-[#f8fafc] text-slate-800 space-y-16 pb-16 overflow-hidden">
 
       {/* ── 1. HERO SEARCH SECTION ───────────────────────────────────── */}
-      <section className="bg-gradient-to-r from-[#08162d] to-[#0f2343] py-16 md:py-24 px-6 md:px-10 text-white relative overflow-hidden">
+      <section className="relative py-16 md:py-28 px-6 md:px-10 text-white overflow-hidden min-h-[520px] flex items-center">
+        {/* Banner Background Slideshow */}
+        <div className="absolute inset-0 z-0">
+          {bannersLoading ? (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#08162d] via-[#0f2343] to-[#132a4d] animate-pulse" />
+          ) : banners.length > 0 ? (
+            banners.map((b, i) => {
+              const showError = bannerErrors[b._id];
+              const isVisible = i === bannerIndex;
+              return (
+                <div
+                  key={b._id}
+                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${isVisible ? "opacity-100" : "opacity-0"}`}
+                >
+                  {showError ? (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#08162d] via-[#0f2343] to-[#132a4d]" />
+                  ) : b.link ? (
+                    <a href={b.link} target="_blank" rel="noopener noreferrer" className="block w-full h-full cursor-pointer">
+                      <img
+                        src={b.imageUrl}
+                        alt={b.title}
+                        className="w-full h-full object-cover"
+                        onError={() => handleBannerError(b._id)}
+                      />
+                    </a>
+                  ) : (
+                    <img
+                      src={b.imageUrl}
+                      alt={b.title}
+                      className="w-full h-full object-cover"
+                      onError={() => handleBannerError(b._id)}
+                    />
+                  )}
+                  {/* Dark gradient overlay for readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+                </div>
+              );
+            })
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#08162d] via-[#0f2343] to-[#132a4d]" />
+          )}
+        </div>
+
+        {/* Banner Navigation Dots */}
+        {banners.length > 1 && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+            {banners.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setBannerIndex(i)}
+                aria-label={`Go to banner ${i + 1}`}
+                className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
+                  i === bannerIndex ? "bg-[#e28a00] w-6" : "bg-white/40 hover:bg-white/70"
+                }`}
+              />
+            ))}
+          </div>
+        )}
         <div className="max-w-6xl mx-auto text-center space-y-6 relative z-10">
           <div className="inline-flex items-center gap-2 bg-white/10 text-[#e28a00] text-xs font-black px-4 py-1.5 rounded-full border border-white/10">
             ⚡ COLLEGE DAKHLA • INDIA'S #1 ADMISSION PLATFORM
