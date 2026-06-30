@@ -3,6 +3,7 @@ const Course = require("../models/Course");
 const { logAudit } = require("../utils/audit");
 const { parsePagination } = require("../utils/pagination");
 const slugify = require("../utils/slugify");
+const { safeRegex } = require("../utils/validation");
 
 const numericFields = ["establishedYear", "ranking", "rating", "fees"];
 const dateFields = ["applicationStartDate", "applicationEndDate"];
@@ -49,24 +50,24 @@ const listColleges = async (req, res, next) => {
       if (req.query.state) {
         let st = req.query.state.trim();
         if (st.toLowerCase() === "up") st = "Uttar Pradesh";
-        locOrs.push({ state: new RegExp(st, "i") });
-        locOrs.push({ location: new RegExp(st, "i") });
+        locOrs.push({ state: safeRegex(st) });
+        locOrs.push({ location: safeRegex(st) });
       }
       if (req.query.city) {
         let ct = req.query.city.trim();
         if (ct.toLowerCase() === "up" || ct.toLowerCase() === "uttar pradesh") {
-          locOrs.push({ state: new RegExp("Uttar Pradesh", "i") });
+          locOrs.push({ state: safeRegex("Uttar Pradesh") });
         } else {
-          locOrs.push({ city: new RegExp(ct, "i") });
-          locOrs.push({ state: new RegExp(ct, "i") });
+          locOrs.push({ city: safeRegex(ct) });
+          locOrs.push({ state: safeRegex(ct) });
         }
-        locOrs.push({ location: new RegExp(ct, "i") });
+        locOrs.push({ location: safeRegex(ct) });
       }
       if (req.query.location) {
         let loc = req.query.location.trim();
-        locOrs.push({ city: new RegExp(loc, "i") });
-        locOrs.push({ state: new RegExp(loc, "i") });
-        locOrs.push({ location: new RegExp(loc, "i") });
+        locOrs.push({ city: safeRegex(loc) });
+        locOrs.push({ state: safeRegex(loc) });
+        locOrs.push({ location: safeRegex(loc) });
       }
       if (locOrs.length > 0) {
         filter.$and = filter.$and || [];
@@ -74,7 +75,7 @@ const listColleges = async (req, res, next) => {
       }
     }
 
-    if (req.query.collegeType) filter.collegeType = new RegExp(req.query.collegeType, "i");
+    if (req.query.collegeType) filter.collegeType = safeRegex(req.query.collegeType);
 
     if (req.query.maxFees || req.query.minFees) {
       filter.fees = {};
@@ -87,7 +88,7 @@ const listColleges = async (req, res, next) => {
       let cleanQ = rawSearch.replace(/admission\s*202\d/i, "").replace(/b\.tech/i, "Engineering").trim();
       if (!cleanQ) cleanQ = rawSearch;
 
-      const regex = new RegExp(cleanQ, "i");
+      const regex = safeRegex(cleanQ);
       
       const matchingCourseIds = await Course.find({
         $or: [{ courseName: regex }, { stream: regex }, { subStream: regex }]
@@ -112,13 +113,13 @@ const listColleges = async (req, res, next) => {
           terms = rawC.split("/").map(t => t.trim()).filter(Boolean);
         }
         terms.forEach(term => {
-          courseOrs.push({ courseName: new RegExp(term, "i") });
-          courseOrs.push({ stream: new RegExp(term, "i") });
-          courseOrs.push({ subStream: new RegExp(term, "i") });
+          courseOrs.push({ courseName: safeRegex(term) });
+          courseOrs.push({ stream: safeRegex(term) });
+          courseOrs.push({ subStream: safeRegex(term) });
         });
       }
       if (req.query.stream) {
-        courseOrs.push({ stream: new RegExp(req.query.stream, "i") });
+        courseOrs.push({ stream: safeRegex(req.query.stream) });
       }
       if (courseOrs.length > 0) {
         courseFilter.$or = courseOrs;

@@ -9,4 +9,6 @@ const CourseDurationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+CourseDurationSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model("CourseDuration", CourseDurationSchema);

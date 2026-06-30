@@ -5,7 +5,7 @@ const ReviewSchema = new mongoose.Schema(
     collegeId:   { type: mongoose.Schema.Types.ObjectId, ref: "College" },
     collegeName: { type: String, default: "IIT BHU Varanasi - Indian Institute of Technology" },
     studentName: { type: String, required: true },
-    email:       { type: String, default: "wowtest@gmail.com" },
+    email:       { type: String },
     batch:       { type: String },
     course:      { type: String },
     ratings: {

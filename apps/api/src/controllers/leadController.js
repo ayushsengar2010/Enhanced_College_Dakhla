@@ -2,6 +2,8 @@ const Lead          = require("../models/Lead");
 const College       = require("../models/College");
 const nodemailer    = require("nodemailer");
 const { parsePagination } = require("../utils/pagination");
+const { sanitizeString, isValidEmail, isValidPhone, safeRegex } = require("../utils/validation");
+const logger = require("../utils/logger");
 
 /**
  * 📩 Create New Lead & Generate Top 5 Matching College Recommendations
@@ -9,21 +11,45 @@ const { parsePagination } = require("../utils/pagination");
 const createLead = async (req, res, next) => {
   try {
     const body   = req.body;
-    const name   = (body.name   || "").trim();
-    const city   = (body.city   || "").trim();
-    const state  = (body.state  || "").trim();
-    const course = (body.course || "").trim();
-    const source = (body.source || "home_recommendation_portal").trim();
+    const name   = sanitizeString(body.name || "", 100);
+    const city   = sanitizeString(body.city || "", 100);
+    const state  = sanitizeString(body.state || "", 100);
+    const course = sanitizeString(body.course || "", 200);
+    const source = sanitizeString(body.source || "home_recommendation_portal", 50);
+    const email  = sanitizeString(body.email || "", 100);
+    const phone  = sanitizeString(body.phone || "", 15);
+
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    if (!phone) {
+      return res.status(400).json({ message: "Phone is required" });
+    }
+
+    // Clean phone digits BEFORE validation to handle formatted numbers (e.g., +91 9876543210)
+    const digitsOnly = phone.replace(/\D/g, "");
+    // Strip leading country codes (91 for India, 1 for US, etc.) if present
+    const cleanedPhone = digitsOnly.length > 10 ? digitsOnly.slice(-10) : digitsOnly;
+    if (!isValidPhone(cleanedPhone)) {
+      return res.status(400).json({ message: "Invalid phone number. Must be 10 digits starting with 6-9." });
+    }
 
     // 🔍 Multi-Tiered Location & Course Matching Algorithm
     let matchingColleges = [];
 
     if (state) {
-      const stateRegex = new RegExp(state, "i");
+      const stateRegex = safeRegex(state);
 
       if (city) {
         const cityColleges = await College.find({
-          city: new RegExp(city, "i"),
+          city: safeRegex(city),
           state: stateRegex,
           status: "Active",
         })
@@ -71,17 +97,17 @@ const createLead = async (req, res, next) => {
 
     const leadPayload = {
       name,
-      email:            body.email,
-      phone:            body.phone,
-      state:            body.state,
-      city:             body.city,
-      course:           body.course,
-      message:          body.message  || "",
+      email,
+      phone: cleanedPhone,
+      state: state || undefined,
+      city: city || undefined,
+      course: course || undefined,
+      message:          sanitizeString(body.message || "", 1000),
       source,
       collegeId:        body.collegeId || null,
       assignedColleges: assignedCollegeIds,
       status:           "Pending",
-      remark:           body.remark   || "",
+      remark:           sanitizeString(body.remark || "", 500),
     };
 
     const newLead = await Lead.create(leadPayload);
@@ -208,12 +234,19 @@ const sendLeadEmail = async (req, res, next) => {
     const lead = await Lead.findById(id);
     if (!lead) return res.status(404).json({ message: "Lead not found" });
 
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return res.status(503).json({
+        message: "Email service not configured. Please set SMTP_HOST, SMTP_USER, and SMTP_PASS in environment variables.",
+      });
+    }
+
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.ethereal.email",
-      port: process.env.SMTP_PORT || 587,
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || "587", 10),
+      secure: process.env.SMTP_SECURE === "true",
       auth: {
-        user: process.env.SMTP_USER || "test@ethereal.email",
-        pass: process.env.SMTP_PASS || "testpass",
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
 
@@ -227,7 +260,9 @@ const sendLeadEmail = async (req, res, next) => {
     await transporter.sendMail(mailOptions);
     res.json({ message: `Email successfully triggered to ${lead.email}` });
   } catch (err) {
-    res.status(200).json({ message: "Simulated email notification sent to student (SMTP Configured)." });
+    console.error("Failed to send email to lead:", err.message);
+    // Return a proper error instead of lying to the user
+    next(new Error(`Failed to send email: ${err.message}`));
   }
 };
 

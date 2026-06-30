@@ -10,4 +10,6 @@ const SubstreamSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+SubstreamSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model("Substream", SubstreamSchema);

@@ -1,5 +1,6 @@
 const Exam = require("../models/Exam");
 const { parsePagination } = require("../utils/pagination");
+const { safeRegex } = require("../utils/validation");
 
 const listExams = async (req, res, next) => {
   try {
@@ -7,7 +8,7 @@ const listExams = async (req, res, next) => {
     const filter = { isDeleted: false };
     if (req.query.stream) filter.stream = req.query.stream;
     if (req.query.status) filter.status = req.query.status;
-    if (req.query.search) filter.examName = new RegExp(req.query.search, "i");
+    if (req.query.search) filter.examName = safeRegex(req.query.search);
     const [items, total] = await Promise.all([
       Exam.find(filter).sort({ applicationEnd: 1 }).skip(skip).limit(limit),
       Exam.countDocuments(filter),

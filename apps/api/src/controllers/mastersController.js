@@ -2,13 +2,14 @@ const Stream = require("../models/Stream");
 const Substream = require("../models/Substream");
 const CourseDuration = require("../models/CourseDuration");
 const { parsePagination } = require("../utils/pagination");
+const { safeRegex } = require("../utils/validation");
 
 // Streams
 const listStreams = async (req, res, next) => {
   try {
     const { page, limit, skip } = parsePagination(req.query);
     const filter = { isDeleted: false };
-    if (req.query.search) filter.streamName = new RegExp(req.query.search, "i");
+    if (req.query.search) filter.streamName = safeRegex(req.query.search);
     const [items, total] = await Promise.all([
       Stream.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Stream.countDocuments(filter),
@@ -27,6 +28,9 @@ const createStream = async (req, res, next) => {
 const updateStream = async (req, res, next) => {
   try {
     const stream = await Stream.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!stream) {
+      return res.status(404).json({ message: "Stream not found" });
+    }
     res.json(stream);
   } catch (err) { next(err); }
 };
@@ -43,7 +47,7 @@ const listSubstreams = async (req, res, next) => {
   try {
     const { page, limit, skip } = parsePagination(req.query);
     const filter = { isDeleted: false };
-    if (req.query.search) filter.substreamName = new RegExp(req.query.search, "i");
+    if (req.query.search) filter.substreamName = safeRegex(req.query.search);
     const [items, total] = await Promise.all([
       Substream.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Substream.countDocuments(filter),
@@ -62,13 +66,19 @@ const createSubstream = async (req, res, next) => {
 const updateSubstream = async (req, res, next) => {
   try {
     const substream = await Substream.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!substream) {
+      return res.status(404).json({ message: "Substream not found" });
+    }
     res.json(substream);
   } catch (err) { next(err); }
 };
 
 const deleteSubstream = async (req, res, next) => {
   try {
-    await Substream.findByIdAndUpdate(req.params.id, { isDeleted: true });
+    const substream = await Substream.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
+    if (!substream) {
+      return res.status(404).json({ message: "Substream not found" });
+    }
     res.json({ message: "Deleted" });
   } catch (err) { next(err); }
 };
@@ -78,7 +88,7 @@ const listCourseDurations = async (req, res, next) => {
   try {
     const { page, limit, skip } = parsePagination(req.query);
     const filter = { isDeleted: false };
-    if (req.query.search) filter.duration = new RegExp(req.query.search, "i");
+    if (req.query.search) filter.duration = safeRegex(req.query.search);
     const [items, total] = await Promise.all([
       CourseDuration.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       CourseDuration.countDocuments(filter),
@@ -97,13 +107,19 @@ const createCourseDuration = async (req, res, next) => {
 const updateCourseDuration = async (req, res, next) => {
   try {
     const duration = await CourseDuration.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!duration) {
+      return res.status(404).json({ message: "Course duration not found" });
+    }
     res.json(duration);
   } catch (err) { next(err); }
 };
 
 const deleteCourseDuration = async (req, res, next) => {
   try {
-    await CourseDuration.findByIdAndUpdate(req.params.id, { isDeleted: true });
+    const duration = await CourseDuration.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
+    if (!duration) {
+      return res.status(404).json({ message: "Course duration not found" });
+    }
     res.json({ message: "Deleted" });
   } catch (err) { next(err); }
 };

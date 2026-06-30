@@ -1,5 +1,6 @@
 const Blog = require("../models/Blog");
 const { parsePagination } = require("../utils/pagination");
+const { safeRegex } = require("../utils/validation");
 
 const listBlogs = async (req, res, next) => {
   try {
@@ -11,12 +12,13 @@ const listBlogs = async (req, res, next) => {
       filter.status = req.query.status;
     }
     if (req.query.category && req.query.category !== "All") {
+      const cat = safeRegex(req.query.category);
       filter.$or = [
-        { category: new RegExp(`^${req.query.category}$`, "i") },
-        { blogCategory: new RegExp(`^${req.query.category}$`, "i") }
+        { category: cat },
+        { blogCategory: cat }
       ];
     }
-    if (req.query.search) filter.title = new RegExp(req.query.search, "i");
+    if (req.query.search) filter.title = safeRegex(req.query.search);
     const [items, total] = await Promise.all([
       Blog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Blog.countDocuments(filter),

@@ -8,10 +8,11 @@ const {
   sendLeadEmail,
   exportLeadsCSV,
 } = require("../controllers/leadController");
+const { leadLimiter } = require("../middleware/rateLimiter");
 
 const router = express.Router();
 
-router.post("/", createLead);
+router.post("/", leadLimiter, createLead);
 router.get("/", listLeads);
 router.get("/export/csv", exportLeadsCSV);
 router.get("/:id", getLeadById);

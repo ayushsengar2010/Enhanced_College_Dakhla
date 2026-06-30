@@ -1,5 +1,6 @@
 const Scholarship = require("../models/Scholarship");
 const { parsePagination } = require("../utils/pagination");
+const { safeRegex } = require("../utils/validation");
 
 const listScholarships = async (req, res, next) => {
   try {
@@ -8,7 +9,7 @@ const listScholarships = async (req, res, next) => {
     if (!req.user) filter.isActive = true;
     if (req.query.type) filter.type = req.query.type;
     if (req.query.stream) filter.stream = req.query.stream;
-    if (req.query.search) filter.name = new RegExp(req.query.search, "i");
+    if (req.query.search) filter.name = safeRegex(req.query.search);
     const [items, total] = await Promise.all([
       Scholarship.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Scholarship.countDocuments(filter),

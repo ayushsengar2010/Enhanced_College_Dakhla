@@ -1,5 +1,6 @@
 const StudyMaterial = require("../models/StudyMaterial");
 const { parsePagination } = require("../utils/pagination");
+const { safeRegex } = require("../utils/validation");
 
 const listStudyMaterials = async (req, res, next) => {
   try {
@@ -7,8 +8,8 @@ const listStudyMaterials = async (req, res, next) => {
     const filter = { isDeleted: false };
     if (req.query.stream)   filter.stream = req.query.stream;
     if (req.query.type)     filter.type   = req.query.type;
-    if (req.query.examName) filter.examName = new RegExp(req.query.examName, "i");
-    if (req.query.search)   filter.title    = new RegExp(req.query.search, "i");
+    if (req.query.examName) filter.examName = safeRegex(req.query.examName);
+    if (req.query.search)   filter.title    = safeRegex(req.query.search);
     const [items, total] = await Promise.all([
       StudyMaterial.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       StudyMaterial.countDocuments(filter),

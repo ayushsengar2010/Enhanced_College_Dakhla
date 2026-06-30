@@ -2,6 +2,11 @@ const express = require("express");
 const cors    = require("cors");
 const helmet  = require("helmet");
 const morgan  = require("morgan");
+const compression = require("compression");
+const mongoose = require("mongoose");
+
+const { apiLimiter, authLimiter } = require("./middleware/rateLimiter");
+const { publicCache, noCache } = require("./middleware/cache");
 
 // Existing routes
 const authRoutes       = require("./routes/authRoutes");
@@ -28,14 +33,51 @@ const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
 
+// Security & Performance middleware
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+app.use(compression());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use("/uploads", express.static("uploads"));
 
-app.get("/api/health", (req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
+// Apply general rate limiting to all API routes
+app.use("/api", apiLimiter);
+
+// Apply caching headers to public read-heavy routes
+app.use("/api/colleges", publicCache(300));  // Cache colleges for 5 min
+app.use("/api/courses", publicCache(300));
+app.use("/api/exams", publicCache(300));
+app.use("/api/blogs", publicCache(300));
+app.use("/api/scholarships", publicCache(300));
+app.use("/api/study-materials", publicCache(300));
+app.use("/api/reviews", publicCache(300));
+app.use("/api/testimonials", publicCache(300));
+app.use("/api/questions", publicCache(300));
+app.use("/api/alerts", publicCache(300));
+app.use("/api/alerts/subscribe", noCache);
+app.use("/api/leads", noCache);
+app.use("/api/auth", noCache);
+app.use("/api/predictor", noCache);
+app.use("/api/analytics", noCache);
+app.use("/api/uploads", noCache);
+
+app.get("/api/health", (req, res) =>
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development",
+    mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+  })
+);
 
 // Existing
 app.use("/api/auth",         authRoutes);

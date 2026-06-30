@@ -19,5 +19,6 @@ const ScholarshipSchema = new mongoose.Schema(
 );
 
 ScholarshipSchema.index({ isActive: 1 });
+ScholarshipSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model("Scholarship", ScholarshipSchema);

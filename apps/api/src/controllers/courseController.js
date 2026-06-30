@@ -1,12 +1,13 @@
 const Course = require("../models/Course");
 const { parsePagination } = require("../utils/pagination");
+const { safeRegex } = require("../utils/validation");
 
 const listCourses = async (req, res, next) => {
   try {
     const { page, limit, skip } = parsePagination(req.query);
     const filter = { isDeleted: false };
     if (req.query.search) {
-      filter.courseName = new RegExp(req.query.search, "i");
+      filter.courseName = safeRegex(req.query.search);
     }
 
     const [items, total] = await Promise.all([
@@ -31,12 +32,16 @@ const createCourse = async (req, res, next) => {
 
 const updateCourse = async (req, res, next) => {
   try {
-    const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
+    const course = await Course.findOneAndUpdate(
+      { _id: req.params.id, isDeleted: false },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!course) {
-      return res.status(404).json({ message: "Course not found" });
+      return res.status(404).json({ message: "Course not found or has been deleted" });
     }
     res.json(course);
   } catch (err) {

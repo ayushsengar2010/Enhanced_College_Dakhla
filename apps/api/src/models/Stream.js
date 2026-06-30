@@ -9,4 +9,6 @@ const StreamSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+StreamSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model("Stream", StreamSchema);
