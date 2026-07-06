@@ -1,5 +1,7 @@
 const dotenv = require("dotenv");
 const http = require("http");
+const mongoose = require("mongoose");
+const logger = require("./utils/logger");
 
 dotenv.config();
 
@@ -16,23 +18,22 @@ const REQUIRED_ENV_VARS = [
 
 const missingVars = REQUIRED_ENV_VARS.filter((v) => !process.env[v.key]);
 if (missingVars.length > 0) {
-  console.error("❌ CRITICAL: Missing required environment variables:");
+  logger.error("CRITICAL: Missing required environment variables:");
   missingVars.forEach((v) => {
-    console.error(`   - ${v.key}: ${v.message}`);
+    logger.error(`   - ${v.key}: ${v.message}`);
   });
-  console.error("\n💡 Create a .env file in apps/api/ with these variables.");
-  console.error("   See .env.example for reference.\n");
+  logger.error("💡 Create a .env file in apps/api/ with these variables. See .env.example for reference.");
   process.exit(1);
 }
 
 // Warn if JWT_SECRET looks weak
 if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 16) {
-  console.warn("⚠️  WARNING: JWT_SECRET is too short. Use a strong, random secret of at least 32 characters.");
+  logger.warn("JWT_SECRET is too short. Use a strong, random secret of at least 32 characters.");
 }
 
 // Warn about CORS
 if (!process.env.CORS_ORIGIN) {
-  console.warn("⚠️  WARNING: CORS_ORIGIN not set. Defaulting to '*' which is insecure for production.");
+  logger.warn("CORS_ORIGIN not set. Defaulting to '*' which is insecure for production.");
 }
 
 const app = require("./app");
@@ -41,19 +42,105 @@ const { initSocket } = require("./socket");
 
 const PORT = process.env.PORT || 5000;
 
+let server;
+
+// Handle uncaught exceptions and unhandled promise rejections globally
+process.on("uncaughtException", (error) => {
+  logger.error("UNCAUGHT EXCEPTION! Shutting down gracefully...", {
+    error: error.message,
+    stack: error.stack,
+  });
+  gracefulShutdown(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.error("UNHANDLED REJECTION! Shutting down gracefully...", {
+    reason: reason instanceof Error ? reason.message : reason,
+    stack: reason instanceof Error ? reason.stack : undefined,
+  });
+  gracefulShutdown(1);
+});
+
+// Graceful shutdown handler
+function gracefulShutdown(exitCode = 0) {
+  logger.info("Starting graceful shutdown of HTTP server...");
+
+  if (server) {
+    server.close(() => {
+      logger.info("HTTP server closed.");
+      closeDbAndExit(exitCode);
+    });
+
+    // Force close after 10 seconds if connections are hanging
+    setTimeout(() => {
+      logger.warn("Forcing shutdown: active connections did not close in time.");
+      closeDbAndExit(exitCode);
+    }, 10000);
+  } else {
+    closeDbAndExit(exitCode);
+  }
+}
+
+function closeDbAndExit(exitCode) {
+  if (mongoose.connection && mongoose.connection.readyState === 1) {
+    mongoose.connection.close(false)
+      .then(() => {
+        logger.info("MongoDB connection closed.");
+        process.exit(exitCode);
+      })
+      .catch((err) => {
+        logger.error("Error closing MongoDB connection:", err);
+        process.exit(1);
+      });
+  } else {
+    process.exit(exitCode);
+  }
+}
+
+// Handle termination signals
+process.on("SIGTERM", () => {
+  logger.info("SIGTERM received. Starting graceful shutdown...");
+  gracefulShutdown(0);
+});
+
+process.on("SIGINT", () => {
+  logger.info("SIGINT (Ctrl+C) received. Starting graceful shutdown...");
+  gracefulShutdown(0);
+});
+
 connectDb()
   .then(() => {
     // Create HTTP server and attach Socket.IO
-    const server = http.createServer(app);
+    server = http.createServer(app);
     initSocket(server);
 
+    // Gracefully handle server-level errors (like EADDRINUSE)
+    server.on("error", (error) => {
+      if (error.syscall !== "listen") {
+        throw error;
+      }
+      switch (error.code) {
+        case "EADDRINUSE":
+          logger.error(`Port ${PORT} is already in use by another process. Please close the process or use a different port.`);
+          process.exit(1);
+          break;
+        case "EACCES":
+          logger.error(`Port ${PORT} requires elevated privileges.`);
+          process.exit(1);
+          break;
+        default:
+          logger.error("Server listen error:", error);
+          process.exit(1);
+      }
+    });
+
     server.listen(PORT, () => {
-      console.log(`✅ API listening on http://localhost:${PORT}`);
-      console.log(`🔒 Environment: ${process.env.NODE_ENV || "development"}`);
-      console.log(`🔌 WebSocket ready (Socket.IO)`);
+      logger.info(`API listening on http://localhost:${PORT}`);
+      logger.info(`Environment: ${process.env.NODE_ENV || "development"}`);
+      logger.info("WebSocket ready (Socket.IO)");
     });
   })
   .catch((err) => {
-    console.error("❌ DB connection failed", err);
+    logger.error("DB connection failed", err);
     process.exit(1);
   });
