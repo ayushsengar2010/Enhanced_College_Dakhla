@@ -50,7 +50,7 @@ const STATIC_COURSES = [
   { _id: "s8", courseName: "Bachelor of Medicine & Surgery [MBBS]",     stream: "Medical",     duration: "5.5 Years",entranceExam: "NEET UG",           fees: "1,35,000/Yr"},
 ];
 
-const ALL_STREAMS   = ["Management", "Commerce", "Engineering", "Arts", "Medical", "Design", "Pharmacy"];
+const ALL_STREAMS   = ["Engineering", "Management", "Medical", "Commerce", "Science", "Arts", "Design", "Pharmacy", "Law", "Computer Applications"];
 const ALL_DURATIONS = ["2 Years", "3 Years", "4 Years", "5.5 Years"];
 
 /* helper */

@@ -21,13 +21,13 @@ const ReviewsPage = () => {
   const { data: reviewsRes, isLoading: loading } = useQuery({
     queryKey: ["public-reviews"],
     queryFn: () => getReviews({ limit: 50 }),
-    staleTime: 60000,
+    staleTime: 5000,
   });
 
   const { data: collegesRes } = useQuery({
     queryKey: ["public-colleges-dropdown"],
     queryFn: () => getColleges({ limit: 50 }),
-    staleTime: 60000,
+    staleTime: 5000,
   });
 
   const submitMutation = useMutation({

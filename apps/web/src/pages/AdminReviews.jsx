@@ -27,6 +27,7 @@ const AdminReviews = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-reviews-table", search, page, limit],
     queryFn: () => getReviews({ search: search || undefined, page, limit }),
+    staleTime: 5000,
   });
 
   const toggleStatusMutation = useMutation({

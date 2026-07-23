@@ -53,13 +53,13 @@ const Blogs = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["public-blogs"],
     queryFn: () => getBlogs({ limit: 50 }),
-    staleTime: 60000,
+    staleTime: 5000,
   });
 
   const { data: featuredPosts } = useQuery({
     queryKey: ["featured-blogs"],
     queryFn: () => getFeaturedBlogs({ limit: 6 }),
-    staleTime: 60000,
+    staleTime: 5000,
   });
 
   const apiBlogs = data?.items || [];

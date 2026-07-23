@@ -102,6 +102,12 @@ const CollegeList = () => {
             <option value="Management">Management</option>
             <option value="Medical">Medical</option>
             <option value="Commerce">Commerce</option>
+            <option value="Science">Science</option>
+            <option value="Arts">Arts</option>
+            <option value="Design">Design</option>
+            <option value="Pharmacy">Pharmacy</option>
+            <option value="Law">Law</option>
+            <option value="Computer Applications">Computer Applications</option>
           </select>
         </div>
         <div className="space-y-1">

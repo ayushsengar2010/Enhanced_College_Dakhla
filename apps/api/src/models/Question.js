@@ -17,7 +17,7 @@ const QuestionSchema = new mongoose.Schema(
     body:        { type: String },
     authorName:  { type: String, required: true },
     authorEmail: { type: String },
-    stream:      { type: String, enum: ["Engineering","Management","Medical","Commerce","Arts","Law","General","Other"], default: "General" },
+    stream:      { type: String, enum: ["Engineering","Management","Medical","Commerce","Science","Arts","Design","Pharmacy","Law","Computer Applications","General","Other"], default: "General" },
     tags:        [String],
     answers:     [AnswerSchema],
     views:       { type: Number, default: 0 },

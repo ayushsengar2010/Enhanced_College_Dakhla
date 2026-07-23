@@ -146,3 +146,8 @@ college-dakhla/
 | `npm run dev:web` | Start web only |
 | `npm run build` | Build frontend for production |
 | `npm run start` | Start API in production mode |
+
+
+
+
+http://localhost:5000/api

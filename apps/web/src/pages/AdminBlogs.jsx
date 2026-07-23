@@ -31,6 +31,7 @@ const AdminBlogs = () => {
       status: "",
       category: category === "All" ? undefined : category,
     }),
+    staleTime: 5000,
   });
 
   const deleteMutation = useMutation({

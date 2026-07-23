@@ -180,6 +180,17 @@ const AdminStudyMaterials = () => {
                     <td className="py-3.5 px-4 font-bold text-emerald-600">⬇️ {mat.downloads || 0}</td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center justify-center gap-2">
+                        {mat.fileUrl && (
+                          <a
+                            href={mat.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="View / Open External Link"
+                            className="w-7 h-7 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 flex items-center justify-center transition-colors"
+                          >
+                            👁️
+                          </a>
+                        )}
                         <button
                           onClick={() => handleOpenEdit(mat)}
                           title="Edit Study Material"

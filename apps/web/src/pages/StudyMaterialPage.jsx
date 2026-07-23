@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getStudyMaterials } from "../lib/api";
 
-const STREAMS = ["Engineering","Management","Medical","Commerce","Arts","Other"];
+const STREAMS = ["Engineering","Management","Medical","Commerce","Science","Arts","Design","Pharmacy","Law","Computer Applications","Other"];
 const TYPES   = ["Syllabus","Notes","Sample Paper","Previous Year","Ebook","Video Link","Other"];
 
 const typeIcon = { Syllabus:"📋", Notes:"📝", "Sample Paper":"📄", "Previous Year":"🗂️", Ebook:"📕", "Video Link":"🎬", Other:"📦" };
@@ -87,12 +87,19 @@ const StudyMaterialPage = () => {
                     <span className="font-medium">⬇️ {m.downloads || 0} downloads</span>
                   </div>
                   {m.fileUrl ? (
-                    <a href={m.fileUrl} target="_blank" rel="noopener noreferrer"
-                      className="block text-center text-white text-xs font-extrabold py-2.5 rounded-xl transition-all"
+                    <a
+                      href={m.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        try { getStudyMaterialById(m._id); } catch(e){}
+                      }}
+                      className="block text-center text-white text-xs font-black py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
                       style={{ backgroundColor: "#e28a00" }}
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#c67900"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#e28a00"}>
-                      Download / View ↓
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#e28a00"}
+                    >
+                      👁️ View Material / Open Link ↗
                     </a>
                   ) : (
                     <Link to="/contact" className="block text-center text-xs font-extrabold py-2.5 rounded-xl border border-[#e28a00] text-[#e28a00] hover:bg-[rgba(226,138,0,0.05)] transition-all">

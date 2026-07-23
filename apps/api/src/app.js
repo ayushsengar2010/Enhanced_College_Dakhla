@@ -72,6 +72,20 @@ app.use("/api/predictor", noCache);
 app.use("/api/analytics", noCache);
 app.use("/api/uploads", noCache);
 
+app.get("/api", (req, res) =>
+  res.json({
+    success: true,
+    message: "College Dakhla API is running!",
+    endpoints: {
+      health: "/api/health",
+      colleges: "/api/colleges",
+      courses: "/api/courses",
+      blogs: "/api/blogs",
+      exams: "/api/exams",
+    },
+  })
+);
+
 app.get("/api/health", (req, res) =>
   res.json({
     status: "ok",

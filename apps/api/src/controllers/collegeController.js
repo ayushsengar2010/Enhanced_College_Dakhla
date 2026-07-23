@@ -10,6 +10,9 @@ const dateFields = ["applicationStartDate", "applicationEndDate"];
 
 const sanitizeCollegePayload = (payload) => {
   const sanitized = { ...payload };
+  if (!sanitized.collegeName && sanitized.name) {
+    sanitized.collegeName = sanitized.name;
+  }
   for (const field of numericFields) {
     if (sanitized[field] === "" || sanitized[field] === null) delete sanitized[field];
   }

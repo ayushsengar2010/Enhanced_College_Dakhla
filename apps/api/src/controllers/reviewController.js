@@ -8,6 +8,17 @@ const listReviews = async (req, res, next) => {
     const filter = { isDeleted: false };
     if (req.query.collegeId) filter.collegeId = req.query.collegeId;
     if (req.query.status) filter.status = req.query.status;
+    if (req.query.search) {
+      const { safeRegex } = require("../utils/validation");
+      const rg = safeRegex(req.query.search);
+      filter.$or = [
+        { studentName: rg },
+        { collegeName: rg },
+        { title: rg },
+        { message: rg },
+        { course: rg }
+      ];
+    }
     
     const [items, total] = await Promise.all([
       Review.find(filter).populate("collegeId", "collegeName slug").sort({ createdAt: -1 }).skip(skip).limit(limit),
