@@ -7,6 +7,7 @@ import LeadForm from "../components/forms/LeadForm";
 const CollegeDetail = () => {
   const { slug } = useParams();
   const [activeTab, setActiveTab] = useState("Info");
+  const [logoErr, setLogoErr] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["college", slug],
@@ -66,8 +67,8 @@ const CollegeDetail = () => {
           {/* Left: Logo + Name */}
           <div className="flex items-center gap-5">
             <div className="w-20 h-20 bg-white rounded-2xl p-2.5 flex items-center justify-center shadow-lg shrink-0">
-              {data.logo
-                ? <img src={data.logo} alt={data.collegeName} className="max-h-full max-w-full object-contain" />
+              {data.logo && !logoErr
+                ? <img src={data.logo} alt={data.collegeName} onError={() => setLogoErr(true)} className="max-h-full max-w-full object-contain" />
                 : <span className="text-4xl">🏛️</span>}
             </div>
             <div className="space-y-1.5">
