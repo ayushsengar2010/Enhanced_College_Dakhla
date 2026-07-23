@@ -20,6 +20,40 @@ const sanitizeCollegePayload = (payload) => {
     if (sanitized[field] === "") delete sanitized[field];
   }
   if (sanitized.slug === "") delete sanitized.slug;
+
+  // Bi-directional synchronization between sections object & Admin Rich Text fields
+  sanitized.sections = sanitized.sections || {};
+
+  if (sanitized.infoDescription) {
+    sanitized.sections.about = sanitized.infoDescription;
+  } else if (sanitized.sections.about) {
+    sanitized.infoDescription = sanitized.sections.about;
+  }
+
+  if (sanitized.coursesFeesDescription) {
+    sanitized.sections.coursesFees = sanitized.coursesFeesDescription;
+  } else if (sanitized.sections.coursesFees) {
+    sanitized.coursesFeesDescription = sanitized.sections.coursesFees;
+  }
+
+  if (sanitized.admissionDescription) {
+    sanitized.sections.admissionProcess = sanitized.admissionDescription;
+  } else if (sanitized.sections.admissionProcess) {
+    sanitized.admissionDescription = sanitized.sections.admissionProcess;
+  }
+
+  if (sanitized.cutoffDescription) {
+    sanitized.sections.cutoff = sanitized.cutoffDescription;
+  } else if (sanitized.sections.cutoff) {
+    sanitized.cutoffDescription = sanitized.sections.cutoff;
+  }
+
+  if (sanitized.placementDescription) {
+    sanitized.sections.placements = sanitized.placementDescription;
+  } else if (sanitized.sections.placements) {
+    sanitized.placementDescription = sanitized.sections.placements;
+  }
+
   return sanitized;
 };
 
