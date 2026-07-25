@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getLeads, updateLead, deleteLead, sendLeadEmail } from "../lib/api";
+import { getLeads, updateLead, deleteLead, sendLeadEmail, getLeadCsvUrl } from "../lib/api";
 
 const STATUSES = ["Pending", "Contacted", "Interested", "Not Interested", "Admission Done", "Closed"];
 
@@ -75,8 +75,7 @@ const AdminLeads = () => {
   };
 
   const handleExportCSV = () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-    window.open(`${baseUrl}/api/leads/export/csv`, "_blank");
+    window.open(getLeadCsvUrl(), "_blank");
   };
 
   const leads = data?.items || [];

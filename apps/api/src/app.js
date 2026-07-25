@@ -34,14 +34,17 @@ const bannerRoutes        = require("./routes/bannerRoutes");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : "*";
 
 // Security & Performance middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(compression());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    origin: corsOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -93,8 +96,29 @@ app.get("/api/health", (req, res) =>
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || "development",
     mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    ready: mongoose.connection.readyState === 1,
   })
 );
+
+app.get("/api/ready", (req, res) => {
+  const databaseReady = mongoose.connection.readyState === 1;
+
+  if (!databaseReady) {
+    return res.status(503).json({
+      status: "not_ready",
+      ready: false,
+      timestamp: new Date().toISOString(),
+      mongodb: "disconnected",
+    });
+  }
+
+  return res.json({
+    status: "ready",
+    ready: true,
+    timestamp: new Date().toISOString(),
+    mongodb: "connected",
+  });
+});
 
 // Existing
 app.use("/api/auth",         authRoutes);

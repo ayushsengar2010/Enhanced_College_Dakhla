@@ -78,6 +78,7 @@ npm run dev
 | **Frontend** | http://localhost:5173 |
 | **API Server** | http://localhost:5000 |
 | **Health Check** | http://localhost:5000/api/health |
+| **Readiness Probe** | http://localhost:5000/api/ready |
 | **Admin Login** | http://localhost:5173/admin/login |
 
 ### Admin Credentials
@@ -146,8 +147,3 @@ college-dakhla/
 | `npm run dev:web` | Start web only |
 | `npm run build` | Build frontend for production |
 | `npm run start` | Start API in production mode |
-
-
-
-
-http://localhost:5000/api

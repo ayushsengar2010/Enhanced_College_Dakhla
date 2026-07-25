@@ -1,7 +1,8 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { io } from "socket.io-client";
+import { getSocketUrl } from "../lib/api";
 
-const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const SOCKET_URL = getSocketUrl();
 
 /**
  * useSocket — connects to the backend Socket.IO server for real-time updates.

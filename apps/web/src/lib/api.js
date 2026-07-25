@@ -1,7 +1,29 @@
 import axios from "axios";
 
+const DEV_API_ORIGIN = "http://localhost:5000";
+
+export const getApiOrigin = () => {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "");
+  if (configured) return configured;
+
+  return import.meta.env.DEV ? DEV_API_ORIGIN : "";
+};
+
+export const buildApiUrl = (path) => {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const origin = getApiOrigin();
+  return origin ? `${origin}${normalizedPath}` : normalizedPath;
+};
+
+export const getSocketUrl = () => getApiOrigin() || window.location.origin;
+
+export const getUploadUrl = () => buildApiUrl("/api/uploads");
+
+export const getLeadCsvUrl = (source) =>
+  buildApiUrl(`/api/leads/export/csv${source ? `?source=${encodeURIComponent(source)}` : ""}`);
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
+  baseURL: `${getApiOrigin() || ""}/api`,
 });
 
 api.interceptors.request.use((config) => {

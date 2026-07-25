@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getLeads, updateLead, deleteLead, sendLeadEmail } from "../lib/api";
+import { getLeads, updateLead, deleteLead, sendLeadEmail, getLeadCsvUrl } from "../lib/api";
 
 const STATUSES = ["Pending", "Contacted", "Interested", "Not Interested", "Admission Done", "Closed"];
 
@@ -112,7 +112,7 @@ const AdminContactEnquiries = () => {
             Total: {total} messages
           </div>
           <button
-            onClick={() => window.open("http://localhost:5000/api/leads/export/csv?source=contact_page", "_blank")}
+            onClick={() => window.open(getLeadCsvUrl("contact_page"), "_blank")}
             className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5"
           >
             📊 Export CSV

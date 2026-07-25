@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getBanners, createBanner, updateBanner, deleteBanner } from "../lib/api";
+import { getBanners, createBanner, updateBanner, deleteBanner, getUploadUrl } from "../lib/api";
 
 const AdminBanners = () => {
   const queryClient = useQueryClient();
@@ -90,10 +90,11 @@ const AdminBanners = () => {
     form.append("file", file);
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/api/uploads`,
-        { method: "POST", headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` }, body: form }
-      );
+      const res = await fetch(getUploadUrl(), {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
+        body: form,
+      });
       const data = await res.json();
       if (data.url) {
         setFormData((prev) => ({ ...prev, imageUrl: data.url }));

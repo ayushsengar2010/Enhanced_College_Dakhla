@@ -102,6 +102,7 @@ node -e "const bcrypt=require('bcryptjs'); console.log(bcrypt.hashSync('YourPass
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `GET` | `/api/health` | — | Server health, MongoDB status, uptime |
+| `GET` | `/api/ready` | — | Readiness probe for deployment checks; returns 503 until MongoDB is connected |
 
 ### Authentication
 
